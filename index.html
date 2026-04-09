@@ -557,9 +557,9 @@ function activateLicense() {
   const checked = document.getElementById('lic-check').checked;
   const key = document.getElementById('lic-key').value.trim().toUpperCase();
   const err = document.getElementById('lic-err');
-  if (!checked) { err.textContent='? Debe aceptar los t�rminos de licencia'; return; }
-  if (!key) { err.textContent='? Ingrese la clave de activaci�n'; return; }
-  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activaci�n inv�lida'; return; }
+  if (!checked) { err.textContent='? Debe aceptar los terminos de licencia'; return; }
+  if (!key) { err.textContent='? Ingrese la clave de activacion'; return; }
+  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activacion invalida'; return; }
   localStorage.setItem('newcom_lic','1');
   fadeOut('license-screen', () => {
     if (!isConfigured()) {
@@ -583,7 +583,7 @@ async function doLogin() {
   const pass =document.getElementById('login-pass').value;
   const err  =document.getElementById('login-err');
   err.textContent='';
-  if (!email||!pass) { err.textContent='Complet� todos los campos'; return; }
+  if (!email||!pass) { err.textContent='Completa todos los campos'; return; }
   const btn=document.getElementById('btn-login'); btn.disabled=true; btn.textContent='INGRESANDO...';
   const { data, error } = await db.auth.signInWithPassword({ email, password:pass });
   btn.disabled=false; btn.textContent='INGRESAR';
