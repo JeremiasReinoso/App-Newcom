@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEWCOM — Sistema de Torneos</title>
+<title>NEWCOM  Sistema de Torneos</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -304,32 +304,30 @@
     <div class="box-sub">Tournament Management System v2.1</div>
     <div class="box-title">// Acuerdo de licencia de uso</div>
     <div class="lic-text">
-LICENCIA DE USO — NEWCOM TOURNAMENT MANAGEMENT SYSTEM
-Versión 2.1 | © 2025 Newcom Technologies
+LICENCIA DE USO NEWCOM TOURNAMENT MANAGEMENT SYSTEM
+2026 Newcom
 
-Este software es propiedad exclusiva de Newcom Technologies. Al activar esta licencia, el usuario acepta los siguientes términos:
+Al activar esta licencia, el usuario acepta los siguientes terminos:
 
-1. OTORGAMIENTO DE LICENCIA. Newcom Technologies otorga al Licenciatario una licencia no exclusiva, intransferible y revocable para utilizar este software únicamente para la organización y gestión de torneos deportivos en el marco de actividades autorizadas.
+1. OTORGAMIENTO DE LICENCIA.Al Licenciatario una licencia no exclusiva, intransferible y revocable para utilizar este software unicamente para la organizacion y gestion de torneos deportivos en el marco de actividades autorizadas.
 
-2. RESTRICCIONES. Queda expresamente prohibido: (a) copiar, modificar, distribuir, vender o sublicenciar el software; (b) realizar ingeniería inversa o descompilar el código fuente; (c) utilizar el software para fines comerciales sin autorización escrita de Newcom Technologies; (d) remover o alterar avisos de propiedad intelectual.
+2. RESTRICCIONES. Queda expresamente prohibido: (a) copiar, modificar, distribuir, vender o sublicenciar el software; (b) realizar ingeniera inversa o descompilar el cdigo fuente; (c) utilizar el software para fines comerciales sin autorizacion; (d) remover o alterar avisos de propiedad intelectual.
 
-3. PROPIEDAD INTELECTUAL. El software, incluyendo su diseño, estructura, código y documentación, es propiedad exclusiva de Newcom Technologies y está protegido por las leyes de propiedad intelectual vigentes.
+3. PROPIEDAD INTELECTUAL. El software, incluyendo su diseÃ±o, estructura, codigo y documentacion, es propiedad exclusiva y esta protegido por las leyes de propiedad intelectual vigentes.
 
-4. DATOS. El Licenciatario es responsable de la exactitud de los datos ingresados. Newcom Technologies no asume responsabilidad por pérdida de datos derivada del uso del software.
+4. DATOS. El Licenciatario es responsable de la exactitud de los datos ingresados. Jeremias Reinoso no asume responsabilidad por perdida de datos derivada del uso del software.
 
-5. LIMITACIÓN DE RESPONSABILIDAD. En ningún caso Newcom Technologies será responsable por daños indirectos, incidentales o consecuentes derivados del uso o imposibilidad de uso del software.
-
-6. VIGENCIA. Esta licencia es válida mientras el usuario cumpla los términos aquí establecidos. Newcom Technologies se reserva el derecho de revocar la licencia ante cualquier incumplimiento.
+5. VIGENCIA. Esta licencia es valida mientras el usuario cumpla los terminos aqui establecidos. Jeremias Reinoso se reserva el derecho de revocar la licencia ante cualquier incumplimiento.
     </div>
     <div class="lic-check">
       <input type="checkbox" id="lic-check">
-      <label for="lic-check">He leído y acepto los términos del acuerdo de licencia</label>
+      <label for="lic-check">He leido y acepto los terminos del acuerdo de licencia</label>
     </div>
-    <div class="box-title">// Clave de activación</div>
+    <div class="box-title">// Clave de activacion</div>
     <input type="text" class="lic-key-inp" id="lic-key" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19">
     <div class="err-msg" id="lic-err"></div>
     <button class="btn-full" onclick="activateLicense()">ACTIVAR SISTEMA</button>
-    <div class="box-version">NEWCOM TMS • BUILD 2025.1 • ALL RIGHTS RESERVED</div>
+    <div class="box-version">NEWCOM TMS  BUILD 2026.1  ALL RIGHTS RESERVED</div>
   </div>
 </div>
 
@@ -338,21 +336,21 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <div class="screen-bg"></div><div class="screen-grid"></div>
   <div class="box">
     <div class="box-logo">NEWCOM</div>
-    <div class="box-sub">Tournament Management System</div>
+    <div class="box-sub">Sistema de GestiÃ³n de Torneos</div>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar Sesion</button>
       <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Registrarse</button>
     </div>
     <div id="form-login">
       <div class="fi"><label>Email</label><input type="email" id="login-email" placeholder="usuario@ejemplo.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="fi"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fi"><label>ContraseÃ±a</label><input type="password" id="login-pass" placeholder="******" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="err-msg" id="login-err"></div>
       <button class="btn-full" id="btn-login" onclick="doLogin()">INGRESAR</button>
     </div>
     <div id="form-register" style="display:none">
       <div class="fi"><label>Nombre</label><input type="text" id="reg-name" placeholder="Tu nombre"></div>
       <div class="fi"><label>Email</label><input type="email" id="reg-email" placeholder="usuario@ejemplo.com"></div>
-      <div class="fi"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
+      <div class="fi"><label>ContraseÃ±a</label><input type="password" id="reg-pass" placeholder="MÃ­nimo 6 caracteres"></div>
       <div class="err-msg" id="reg-err"></div>
       <button class="btn-full" id="btn-register" onclick="doRegister()">CREAR CUENTA</button>
     </div>
@@ -365,7 +363,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <header>
     <div class="hdr-logo">NEW<span>COM</span></div>
     <div class="hdr-tournament" id="hdr-tournament" style="display:none">
-      <div class="hdr-tname-wrap"><span>Torneo activo</span><strong id="hdr-tname">—</strong></div>
+      <div class="hdr-tname-wrap"><span>Torneo activo</span><strong id="hdr-tname"></strong></div>
       <button class="btn btn-secondary" style="font-size:11px;padding:5px 9px;" onclick="goToTournaments()">? Torneos</button>
     </div>
     <nav class="hdr-nav" id="hdr-nav" style="display:none">
@@ -384,7 +382,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- TOURNAMENTS PAGE -->
   <div class="page active" id="page-tournaments">
     <div class="page-title">MIS <span>TORNEOS</span></div>
-    <div class="page-desc">// Seleccioná un torneo o creá uno nuevo</div>
+    <div class="page-desc">// Selecciona un torneo o crea uno nuevo</div>
     <div class="tournaments-grid" id="tournaments-grid"></div>
   </div>
 
@@ -394,20 +392,20 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     <div class="page-desc" id="dash-desc">// Resumen del torneo</div>
     <div class="stats-row" id="stats-row"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-      <div class="card"><div class="card-title">Últimos Resultados</div><div id="dash-recent"></div></div>
-      <div class="card"><div class="card-title">Líderes</div><div id="dash-leaders"></div></div>
+      <div class="card"><div class="card-title">Ultimos Resultados</div><div id="dash-recent"></div></div>
+      <div class="card"><div class="card-title">Lideres</div><div id="dash-leaders"></div></div>
     </div>
   </div>
 
   <!-- TEAMS -->
   <div class="page" id="page-teams">
-    <div class="page-title">GESTIÓN DE <span>EQUIPOS</span></div>
+    <div class="page-title">GESTION DE <span>EQUIPOS</span></div>
     <div class="page-desc">// Agregar, editar y retirar equipos</div>
     <div class="card">
       <div class="card-title">Agregar Equipo</div>
       <div class="form-row">
-        <div class="form-group"><label>Nombre del equipo</label><input type="text" id="inp-team-name" placeholder="Ej: Los Águilas" onkeydown="if(event.key==='Enter')addTeam()"></div>
-        <div class="form-group" style="max-width:130px;"><label>Siglas</label><input type="text" id="inp-team-abbr" placeholder="ÁGL" maxlength="3" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>Nombre del equipo</label><input type="text" id="inp-team-name" placeholder="Ej: UAKEN" onkeydown="if(event.key==='Enter')addTeam()"></div>
+        <div class="form-group" style="max-width:130px;"><label>Siglas</label><input type="text" id="inp-team-abbr" placeholder="UAK" maxlength="3" style="text-transform:uppercase"></div>
         <button class="btn btn-primary" onclick="addTeam()">+ Agregar</button>
       </div>
     </div>
@@ -421,8 +419,8 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     <div class="card">
       <div class="card-title">Generar Emparejamiento</div>
       <div class="form-row">
-        <div class="form-group"><label>Equipo 1</label><select id="sel-team1"><option value="">— seleccionar —</option></select></div>
-        <div class="form-group"><label>Equipo 2</label><select id="sel-team2"><option value="">— seleccionar —</option></select></div>
+        <div class="form-group"><label>Equipo 1</label><select id="sel-team1"><option value=""> seleccionar</option></select></div>
+        <div class="form-group"><label>Equipo 2</label><select id="sel-team2"><option value=""> seleccionar</option></select></div>
         <div class="form-group" style="max-width:175px;"><label>Ronda / Fase</label><input type="text" id="inp-round" placeholder="Ej: Fase de grupos"></div>
         <button class="btn btn-accent2" onclick="createMatch()">? Crear Partido</button>
         <button class="btn btn-secondary" onclick="autoMatch()">?? Auto-emparejar</button>
@@ -434,7 +432,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- STANDINGS -->
   <div class="page" id="page-standings">
     <div class="page-title">TABLA DE <span>POSICIONES</span></div>
-    <div class="page-desc">// Clasificación general del torneo</div>
+    <div class="page-desc">// Clasificacion general del torneo</div>
     <div class="card">
       <table class="standings-table">
         <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>P</th><th>Sets G</th><th>Sets P</th><th>Pts</th></tr></thead>
@@ -446,17 +444,17 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="page-title">MI <span>PERFIL</span></div>
-    <div class="page-desc">// Información de tu cuenta</div>
+    <div class="page-desc">// Informacion de tu cuenta</div>
     <div class="profile-grid">
       <div class="card">
         <div class="card-title">Cuenta</div>
         <div class="profile-avatar-big" id="profile-avatar">?</div>
-        <div style="font-size:17px;font-weight:600;margin-bottom:7px;" id="profile-name">—</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-bottom:4px;" id="profile-email">—</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);" id="profile-since">—</div>
-        <div style="margin-top:20px;"><button class="btn-full danger-btn" onclick="doLogout()">CERRAR SESIÓN</button></div>
+        <div style="font-size:17px;font-weight:600;margin-bottom:7px;" id="profile-name"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-bottom:4px;" id="profile-email"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);" id="profile-since"></div>
+        <div style="margin-top:20px;"><button class="btn-full danger-btn" onclick="doLogout()">CERRAR SESION</button></div>
       </div>
-      <div class="card"><div class="card-title">Estadísticas Globales</div><div id="profile-stats"></div></div>
+      <div class="card"><div class="card-title">Estadisticas Globales</div><div id="profile-stats"></div></div>
     </div>
   </div>
 </div>
@@ -466,7 +464,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <div class="modal">
     <div class="modal-title">Nuevo Torneo</div>
     <div class="fi"><label>Nombre del torneo</label><input type="text" id="inp-tname" placeholder="Ej: Copa Primavera 2025" onkeydown="if(event.key==='Enter')confirmNewTournament()"></div>
-    <div class="fi"><label>Deporte / Categoría</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol — Masculino"></div>
+    <div class="fi"><label>Deporte / Categoria</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol  Masculino"></div>
     <div class="err-msg" id="tournament-err"></div>
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="closeModal('modal-new-tournament')">Cancelar</button>
@@ -475,7 +473,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   </div>
 </div>
 
-<!-- MODAL: confirmación -->
+<!-- MODAL: confirmacion -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal">
     <div class="modal-title" id="mc-title">Confirmar</div>
@@ -491,8 +489,8 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
 
 <script>
 /* --------------------------------------------
-   ??  CONFIGURACIÓN SUPABASE
-   Reemplazá estos dos valores con los de tu proyecto en supabase.com
+   ??  CONFIGURACION SUPABASE
+   Reemplaza estos dos valores con los de tu proyecto en supabase.com
 -------------------------------------------- */
 const SUPABASE_URL     = 'https://TU_PROYECTO.supabase.co';
 const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI';
@@ -559,9 +557,9 @@ function activateLicense() {
   const checked = document.getElementById('lic-check').checked;
   const key = document.getElementById('lic-key').value.trim().toUpperCase();
   const err = document.getElementById('lic-err');
-  if (!checked) { err.textContent='? Debe aceptar los términos de licencia'; return; }
-  if (!key) { err.textContent='? Ingrese la clave de activación'; return; }
-  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activación inválida'; return; }
+  if (!checked) { err.textContent='? Debe aceptar los tï¿½rminos de licencia'; return; }
+  if (!key) { err.textContent='? Ingrese la clave de activaciï¿½n'; return; }
+  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activaciï¿½n invï¿½lida'; return; }
   localStorage.setItem('newcom_lic','1');
   fadeOut('license-screen', () => {
     if (!isConfigured()) {
@@ -585,7 +583,7 @@ async function doLogin() {
   const pass =document.getElementById('login-pass').value;
   const err  =document.getElementById('login-err');
   err.textContent='';
-  if (!email||!pass) { err.textContent='Completá todos los campos'; return; }
+  if (!email||!pass) { err.textContent='Completï¿½ todos los campos'; return; }
   const btn=document.getElementById('btn-login'); btn.disabled=true; btn.textContent='INGRESANDO...';
   const { data, error } = await db.auth.signInWithPassword({ email, password:pass });
   btn.disabled=false; btn.textContent='INGRESAR';
@@ -600,15 +598,15 @@ async function doRegister() {
   const pass =document.getElementById('reg-pass').value;
   const err  =document.getElementById('reg-err');
   err.textContent='';
-  if (!name||!email||!pass) { err.textContent='Completá todos los campos'; return; }
-  if (pass.length<6) { err.textContent='La contraseña debe tener al menos 6 caracteres'; return; }
+  if (!name||!email||!pass) { err.textContent='Completa todos los campos'; return; }
+  if (pass.length<6) { err.textContent='La contraseÃ±a debe tener al menos 6 caracteres'; return; }
   const btn=document.getElementById('btn-register'); btn.disabled=true; btn.textContent='CREANDO...';
   const { data, error } = await db.auth.signUp({ email, password:pass, options:{data:{name}} });
   btn.disabled=false; btn.textContent='CREAR CUENTA';
   if (error) { err.textContent='? '+authErr(error.message); return; }
   if (data.user && !data.session) {
     err.style.color='var(--win)';
-    err.textContent='? Cuenta creada. Revisá tu email para confirmar.';
+    err.textContent='? Cuenta creada. Revisa tu email para confirmar.';
     return;
   }
   currentUser=data.user;
@@ -623,9 +621,9 @@ async function doLogout() {
 }
 
 function authErr(msg) {
-  if (msg.includes('Invalid login')) return 'Email o contraseña incorrectos';
-  if (msg.includes('already registered')) return 'Este email ya está registrado';
-  if (msg.includes('Password should')) return 'La contraseña debe tener al menos 6 caracteres';
+  if (msg.includes('Invalid login')) return 'Email o contraseÃ±a incorrectos';
+  if (msg.includes('already registered')) return 'Este email ya estÃ¡ registrado';
+  if (msg.includes('Password should')) return 'La contraseÃ±a debe tener al menos 6 caracteres';
   return msg;
 }
 
@@ -670,7 +668,7 @@ async function loadTournaments() {
   grid.innerHTML='';
   grid.innerHTML+=`<div class="new-tc" onclick="openNewTournamentModal()"><div class="new-tc-icon">+</div><div class="new-tc-lbl">Nuevo Torneo</div></div>`;
   if (!list.length) {
-    grid.innerHTML+=`<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">??</div><div class="empty-msg">No tenés torneos creados</div><div class="empty-sub">Creá tu primer torneo</div></div>`;
+    grid.innerHTML+=`<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">??</div><div class="empty-msg">No tenes torneos creados</div><div class="empty-sub">Crea tu primer torneo</div></div>`;
     return;
   }
   list.forEach(t=>{
@@ -684,7 +682,7 @@ async function loadTournaments() {
         <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')" title="Eliminar">?</button>
         <div class="tc-name">${t.name}</div>
         <div class="tc-meta">
-          <span>? ${t.sport||'—'}</span>
+          <span>? ${t.sport||'ï¿½'}</span>
           <span>?? ${teams} equipos</span>
           <span>?? ${done}/${total} partidos</span>
         </div>
@@ -705,7 +703,7 @@ async function confirmNewTournament() {
   const name =document.getElementById('inp-tname').value.trim();
   const sport=document.getElementById('inp-tsport').value.trim();
   const err  =document.getElementById('tournament-err');
-  if (!name) { err.textContent='Ingresá el nombre del torneo'; return; }
+  if (!name) { err.textContent='Ingresa el nombre del torneo'; return; }
   const t={
     id: Date.now().toString(), name, sport,
     user_id: currentUser.id,
@@ -744,7 +742,7 @@ function selectTournamentObj(t) {
 }
 
 async function deleteTournament(id) {
-  openConfirm('Eliminar torneo','¿Eliminar este torneo? Se perderán todos los datos.',async()=>{
+  openConfirm('Eliminar torneo','Â¿Eliminar este torneo? Se perderan todos los datos.',async()=>{
     if (isConfigured()) {
       await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id);
     } else {
@@ -793,7 +791,7 @@ function showPage(id, event) {
 async function addTeam() {
   const name=document.getElementById('inp-team-name').value.trim();
   const abbr=document.getElementById('inp-team-abbr').value.trim().toUpperCase()||name.slice(0,3).toUpperCase();
-  if (!name){notify('Ingresá el nombre del equipo',true);return;}
+  if (!name){notify('Ingresa el nombre del equipo',true);return;}
   if (state.teams.find(t=>t.name.toLowerCase()===name.toLowerCase())){notify('Ya existe ese equipo',true);return;}
   state.teams.push({id:Date.now(),name,abbr,active:true});
   document.getElementById('inp-team-name').value='';
@@ -804,7 +802,7 @@ async function addTeam() {
 
 function removeTeam(id) {
   const t=state.teams.find(t=>t.id===id);
-  openConfirm('Retirar equipo',`¿Retirás al equipo <strong>${t.name}</strong>?`,async()=>{
+  openConfirm('Retirar equipo',`Â¿Retirar al equipo <strong>${t.name}</strong>?`,async()=>{
     t.active=false; await save(); renderAll();
     notify(`"${t.name}" retirado`);
   });
@@ -835,7 +833,7 @@ function renderMatchSelects() {
   const active=state.teams.filter(t=>t.active);
   ['sel-team1','sel-team2'].forEach(sid=>{
     const s=document.getElementById(sid); if(!s) return;
-    s.innerHTML='<option value="">— seleccionar —</option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    s.innerHTML='<option value=""> seleccionar </option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
   });
 }
 
@@ -843,8 +841,8 @@ async function createMatch(t1id,t2id,round) {
   const id1=t1id||parseInt(document.getElementById('sel-team1').value);
   const id2=t2id||parseInt(document.getElementById('sel-team2').value);
   const rnd=round||document.getElementById('inp-round').value.trim()||'Fase de grupos';
-  if (!id1||!id2){notify('Seleccioná ambos equipos',true);return;}
-  if (id1===id2){notify('No podés emparejar un equipo consigo mismo',true);return;}
+  if (!id1||!id2){notify('Selecciona ambos equipos',true);return;}
+  if (id1===id2){notify('No puedes emparejar un equipo consigo mismo',true);return;}
   const ex=state.matches.find(m=>m.status==='pending'&&((m.t1===id1&&m.t2===id2)||(m.t1===id2&&m.t2===id1)));
   if (ex){notify('Ya existe ese partido pendiente',true);return;}
   state.matches.push({id:state.matchCounter++,t1:id1,t2:id2,round:rnd,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null});
@@ -873,14 +871,14 @@ async function autoMatch() {
 
 async function addSet(mid) {
   const m=state.matches.find(m=>m.id===mid);
-  if (!m||m.sets.length>=4){notify('Máximo 4 sets por partido',true);return;}
+  if (!m||m.sets.length>=4){notify('Maximo 3 sets por partido',true);return;}
   m.sets.push({s1:'',s2:''});
   await save(); renderMatches();
 }
 
 async function removeSet(mid,idx) {
   const m=state.matches.find(m=>m.id===mid);
-  if (!m||m.sets.length<=2){notify('Mínimo 2 sets por partido',true);return;}
+  if (!m||m.sets.length<=2){notify('Mï¿½nimo 2 sets por partido',true);return;}
   m.sets.splice(idx,1);
   await save(); renderMatches();
 }
@@ -900,16 +898,16 @@ async function saveMatch(mid) {
     s.s1=v1; s.s2=v2;
     if(v1>v2) w1++; else if(v2>v1) w2++;
   });
-  if(w1===0&&w2===0){notify('Ingresá al menos un set con ganador',true);return;}
-  if(Math.abs(w1-w2)!==2){notify(`Resultado inválido (${w1}-${w2}). El ganador debe superar por exactamente 2 sets`,true);return;}
+  if(w1===0&&w2===0){notify('Ingresa al menos un set con ganador',true);return;}
+  if(Math.abs(w1-w2)!==2){notify(`Resultado invÃ¡lido (${w1}-${w2}). El ganador debe superar por exactamente 2 sets`,true);return;}
   m.winner=w1>w2?m.t1:m.t2; m.status='done';
   await save(); renderAll();
   const winner=state.teams.find(t=>t.id===m.winner);
-  notify(`Guardado — Ganador: ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ?`);
+  notify(`Guardado  Ganador: ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ?`);
 }
 
 async function deleteMatch(mid) {
-  openConfirm('Eliminar partido','¿Eliminar este partido?',async()=>{
+  openConfirm('Eliminar partido','Â¿Eliminar este partido?',async()=>{
     state.matches=state.matches.filter(m=>m.id!==mid);
     await save(); renderAll(); notify('Partido eliminado');
   });
@@ -918,7 +916,7 @@ async function deleteMatch(mid) {
 function renderMatches() {
   const el=document.getElementById('matches-list'); if(!el) return;
   if(!state.matches.length){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">?</div><div class="empty-msg">Sin partidos creados</div><div class="empty-sub">Creá un emparejamiento arriba</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">?</div><div class="empty-msg">Sin partidos creados</div><div class="empty-sub">Creï¿½ un emparejamiento arriba</div></div>`;
     return;
   }
   el.innerHTML=state.matches.map(m=>{
@@ -985,7 +983,7 @@ function renderStandings() {
   const body=document.getElementById('standings-body'); if(!body) return;
   const rows=calcStandings();
   if(!rows.length||!rows.some(r=>r.pj>0)){
-    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:34px;color:var(--text-muted);">Sin datos aún</td></tr>`;
+    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:34px;color:var(--text-muted);">Sin datos aï¿½n</td></tr>`;
     return;
   }
   body.innerHTML=rows.map((r,i)=>{
@@ -1017,7 +1015,7 @@ function renderDashboard() {
 
   const rec=document.getElementById('dash-recent');
   const dm=state.matches.filter(m=>m.status==='done').slice(-5).reverse();
-  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin resultados aún</div>':
+  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin resultados aun</div>':
     dm.map(m=>{
       const w=state.teams.find(t=>t.id===m.winner);
       const l=state.teams.find(t=>t.id===(m.winner===m.t1?m.t2:m.t1));
@@ -1030,7 +1028,7 @@ function renderDashboard() {
 
   const ld=document.getElementById('dash-leaders');
   const st=calcStandings().filter(r=>r.pj>0).slice(0,5);
-  ld.innerHTML=!st.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin clasificación aún</div>':
+  ld.innerHTML=!st.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin clasificacion aun</div>':
     st.map((r,i)=>`
       <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
         <div class="pos-badge ${i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n'}">${i+1}</div>
@@ -1046,8 +1044,8 @@ async function renderProfile() {
   const name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'?';
   document.getElementById('profile-avatar').textContent=name.slice(0,2).toUpperCase();
   document.getElementById('profile-name').textContent=name;
-  document.getElementById('profile-email').textContent=currentUser?.email||'—';
-  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  document.getElementById('profile-email').textContent=currentUser?.email||'ï¿½';
+  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'ï¿½';
   document.getElementById('profile-since').textContent='Miembro desde '+since;
 
   let list=[];
