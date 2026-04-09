@@ -1,288 +1,347 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEWCOM  Sistema de Torneos</title>
+<title>NEWCOM — Sistema de Torneos</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --bg:#080c14;--surface:#0f1520;--surface2:#161e2e;--border:#1e2d45;
-    --accent:#00d4ff;--accent2:#ff6b35;--accent3:#7fff6b;
-    --text:#e8f0fe;--text-muted:#5a7a9a;--danger:#ff3860;--win:#00e676;--lose:#ff3860;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+:root{
+  --bg:#080c14;--surface:#0f1520;--surface2:#161e2e;--border:#1e2d45;
+  --accent:#00d4ff;--accent2:#ff6b35;--accent3:#7fff6b;
+  --text:#e8f0fe;--text-muted:#5a7a9a;--danger:#ff3860;--win:#00e676;--lose:#ff3860;
+  --cat-m:rgba(0,212,255,.12);--cat-f:rgba(255,107,53,.12);--cat-x:rgba(127,255,107,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-  /* SCREENS */
-  .screen{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#020509;}
-  .screen.hidden{display:none;}
-  .screen-bg{position:absolute;inset:0;pointer-events:none;
-    background:radial-gradient(ellipse 60% 40% at 20% 50%,rgba(0,212,255,.06) 0%,transparent 70%),
-               radial-gradient(ellipse 40% 60% at 80% 30%,rgba(255,107,53,.05) 0%,transparent 70%);}
-  .screen-grid{position:absolute;inset:0;pointer-events:none;
-    background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
-    background-size:60px 60px;}
-  .box{position:relative;background:#0a1220;border:1px solid var(--border);border-top:2px solid var(--accent);
-    padding:46px 50px;width:min(520px,95vw);animation:box-in .5s ease;}
-  @keyframes box-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-  .box-logo{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:6px;color:var(--accent);
-    text-shadow:0 0 40px rgba(0,212,255,.4);line-height:1;margin-bottom:4px;}
-  .box-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:30px;}
-  .box-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#020509;}
+.screen.hidden{display:none;}
+.screen-bg{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 40% at 20% 50%,rgba(0,212,255,.06) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 60% at 80% 30%,rgba(255,107,53,.05) 0%,transparent 70%);}
+.screen-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;}
+.box{position:relative;background:#0a1220;border:1px solid var(--border);border-top:2px solid var(--accent);
+  padding:44px 48px;width:min(520px,95vw);animation:box-in .5s ease;}
+@keyframes box-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.box-logo{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:6px;color:var(--accent);
+  text-shadow:0 0 40px rgba(0,212,255,.4);line-height:1;margin-bottom:4px;}
+.box-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:28px;}
 
-  /* FORM ELEMENTS */
-  .fi{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
-  .fi label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
-  .fi input{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
-    color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
-  .fi input:focus{border-color:var(--accent);}
-  .err-msg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--danger);min-height:16px;margin-bottom:10px;}
+/* ── FORM ELEMENTS ── */
+.fi{display:flex;flex-direction:column;gap:5px;margin-bottom:15px;}
+.fi label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+.fi input,.fi select{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.fi input:focus,.fi select:focus{border-color:var(--accent);}
+.fi select option{background:#060e18;}
+.err-msg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--danger);min-height:16px;margin-bottom:10px;}
 
-  /* BUTTONS */
-  .btn-full{width:100%;background:var(--accent);color:#020509;border:none;padding:14px;
-    font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:4px;cursor:pointer;transition:all .2s;}
-  .btn-full:hover{background:#00eeff;box-shadow:0 0 26px rgba(0,212,255,.4);}
-  .btn-full:disabled{opacity:.3;cursor:not-allowed;}
-  .btn-full.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:15px;letter-spacing:2px;}
-  .btn-full.secondary:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
-  .btn-full.danger-btn{background:var(--danger);color:#fff;font-size:15px;letter-spacing:2px;}
+/* ── BUTTONS ── */
+.btn-full{width:100%;background:var(--accent);color:#020509;border:none;padding:14px;
+  font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:4px;cursor:pointer;transition:all .2s;}
+.btn-full:hover{background:#00eeff;box-shadow:0 0 26px rgba(0,212,255,.4);}
+.btn-full:disabled{opacity:.3;cursor:not-allowed;}
+.btn-full.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:15px;letter-spacing:2px;}
+.btn-full.secondary:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-full.danger-btn{background:var(--danger);color:#fff;font-size:15px;letter-spacing:2px;}
+.btn{padding:9px 17px;border:none;border-radius:3px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:600;letter-spacing:.5px;transition:all .2s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#020509;}
+.btn-primary:hover{background:#00eeff;box-shadow:0 0 14px rgba(0,212,255,.3);}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-success{background:var(--win);color:#020509;}
+.btn-accent2{background:var(--accent2);color:#fff;}
+.btn-accent2:hover{filter:brightness(1.1);}
+.btn-sm{padding:5px 10px;font-size:11px;}
 
-  /* LICENSE */
-  .lic-text{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:15px 17px;
-    font-size:11.5px;line-height:1.8;color:#7a9ab8;max-height:155px;overflow-y:auto;margin-bottom:18px;
-    font-family:'JetBrains Mono',monospace;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
-  .lic-check{display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;user-select:none;}
-  .lic-check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
-  .lic-check label{font-size:13px;cursor:pointer;}
-  .lic-key-inp{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
-    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:3px;
-    outline:none;transition:border-color .2s;width:100%;margin-bottom:4px;}
-  .lic-key-inp:focus{border-color:var(--accent);}
-  .box-version{margin-top:20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#2a3a50;letter-spacing:2px;}
+/* ── LICENSE ── */
+.lic-text{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:15px 17px;
+  font-size:11.5px;line-height:1.8;color:#7a9ab8;max-height:150px;overflow-y:auto;margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.lic-check{display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;user-select:none;}
+.lic-check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.lic-check label{font-size:13px;cursor:pointer;}
+.lic-key-inp{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:3px;
+  outline:none;transition:border-color .2s;width:100%;margin-bottom:4px;}
+.lic-key-inp:focus{border-color:var(--accent);}
+.box-version{margin-top:18px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#2a3a50;letter-spacing:2px;}
 
-  /* AUTH TABS */
-  .auth-tabs{display:flex;margin-bottom:26px;border-bottom:1px solid var(--border);}
-  .auth-tab{flex:1;padding:11px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;
-    letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);
-    border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
-  .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+/* ── AUTH ── */
+.auth-tabs{display:flex;margin-bottom:24px;border-bottom:1px solid var(--border);}
+.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);
+  border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-  /* LOADING */
-  #loading-screen{z-index:9999;}
-  .spinner{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--accent);
-    border-radius:50%;animation:spin .8s linear infinite;margin-bottom:18px;}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .loading-text{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--text-muted);}
+/* ── LOADING ── */
+#loading-screen{z-index:9999;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--text-muted);}
 
-  /* APP */
-  #app{display:none;min-height:100vh;}
-  #app.visible{display:block;animation:app-in .5s ease;}
-  @keyframes app-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+/* ── APP ── */
+#app{display:none;min-height:100vh;}
+#app.visible{display:block;animation:app-in .5s ease;}
+@keyframes app-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
 
-  /* HEADER */
-  header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;
-    display:flex;align-items:center;gap:10px;height:62px;position:sticky;top:0;z-index:100;}
-  .hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px;color:var(--accent);
-    text-shadow:0 0 18px rgba(0,212,255,.3);flex-shrink:0;}
-  .hdr-logo span{color:var(--accent2);}
-  .hdr-tournament{flex:1;display:flex;align-items:center;gap:10px;overflow:hidden;
-    border-left:1px solid var(--border);padding-left:14px;margin-left:2px;}
-  .hdr-tname-wrap{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;
-    color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .hdr-tname-wrap strong{color:var(--text);font-size:13px;display:block;}
-  .hdr-nav{display:flex;gap:2px;flex-shrink:0;}
-  .nav-btn{background:none;border:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;
-    font-size:12px;font-weight:500;letter-spacing:1px;padding:6px 13px;cursor:pointer;border-radius:3px;
-    transition:all .2s;text-transform:uppercase;white-space:nowrap;}
-  .nav-btn:hover{color:var(--text);background:var(--surface2);}
-  .nav-btn.active{color:var(--accent);background:rgba(0,212,255,.08);border-bottom:2px solid var(--accent);}
-  .hdr-user{display:flex;align-items:center;gap:8px;flex-shrink:0;
-    border-left:1px solid var(--border);padding-left:12px;margin-left:2px;}
-  .hdr-avatar{width:32px;height:32px;border-radius:50%;background:rgba(0,212,255,.1);
-    border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;
-    font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--accent);cursor:pointer;flex-shrink:0;}
-  .hdr-uname{font-size:11px;color:var(--text-muted);white-space:nowrap;}
-  .btn-logout{background:none;border:1px solid var(--border);color:var(--text-muted);
-    font-size:11px;padding:5px 9px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
-  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;
+  display:flex;align-items:center;gap:10px;height:60px;position:sticky;top:0;z-index:100;}
+.hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:27px;letter-spacing:5px;color:var(--accent);
+  text-shadow:0 0 18px rgba(0,212,255,.3);flex-shrink:0;}
+.hdr-logo span{color:var(--accent2);}
+.hdr-tournament{flex:1;display:flex;align-items:center;gap:10px;overflow:hidden;
+  border-left:1px solid var(--border);padding-left:13px;margin-left:2px;}
+.hdr-tname-wrap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;
+  color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-tname-wrap strong{color:var(--text);font-size:13px;display:block;}
+.hdr-nav{display:flex;gap:2px;flex-shrink:0;}
+.nav-btn{background:none;border:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;
+  font-size:12px;font-weight:500;letter-spacing:1px;padding:6px 12px;cursor:pointer;border-radius:3px;
+  transition:all .2s;text-transform:uppercase;white-space:nowrap;}
+.nav-btn:hover{color:var(--text);background:var(--surface2);}
+.nav-btn.active{color:var(--accent);background:rgba(0,212,255,.08);border-bottom:2px solid var(--accent);}
+.hdr-user{display:flex;align-items:center;gap:8px;flex-shrink:0;
+  border-left:1px solid var(--border);padding-left:12px;margin-left:2px;}
+.hdr-avatar{width:30px;height:30px;border-radius:50%;background:rgba(0,212,255,.1);
+  border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--accent);cursor:pointer;flex-shrink:0;}
+.hdr-uname{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--text-muted);
+  font-size:11px;padding:4px 9px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
 
-  /* PAGES */
-  .page{display:none;padding:34px 26px;max-width:1280px;margin:0 auto;}
-  .page.active{display:block;animation:pg-in .3s ease;}
-  @keyframes pg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  .page-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;margin-bottom:4px;}
-  .page-title span{color:var(--accent);}
-  .page-desc{color:var(--text-muted);font-size:13px;margin-bottom:26px;font-family:'JetBrains Mono',monospace;}
+/* ── PAGES ── */
+.page{display:none;padding:30px 24px;max-width:1280px;margin:0 auto;}
+.page.active{display:block;animation:pg-in .3s ease;}
+@keyframes pg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;margin-bottom:4px;}
+.page-title span{color:var(--accent);}
+.page-desc{color:var(--text-muted);font-size:12px;margin-bottom:22px;font-family:'JetBrains Mono',monospace;}
 
-  /* CARDS */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:22px;margin-bottom:18px;}
-  .card-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;color:var(--accent);
-    margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .card-title::before{content:'';width:3px;height:17px;background:var(--accent);display:inline-block;}
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:16px;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--accent);
+  margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.card-title::before{content:'';width:3px;height:16px;background:var(--accent);display:inline-block;}
 
-  /* STATS */
-  .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:13px;margin-bottom:26px;}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;}
-  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--accent);line-height:1;margin-bottom:4px;}
-  .stat-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:var(--accent);line-height:1;margin-bottom:3px;}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
 
-  /* TOURNAMENTS */
-  .tournaments-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:15px;}
-  .tournament-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
-    padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-  .tournament-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-    background:var(--accent);transform:scaleX(0);transition:transform .2s;}
-  .tournament-card:hover{border-color:var(--accent);transform:translateY(-2px);}
-  .tournament-card:hover::before{transform:scaleX(1);}
-  .tc-name{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;margin-bottom:6px;}
-  .tc-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;}
-  .tc-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);margin-top:10px;}
-  .tc-del{position:absolute;top:10px;right:10px;background:none;border:1px solid transparent;
-    color:var(--text-muted);width:24px;height:24px;border-radius:3px;cursor:pointer;font-size:12px;
-    display:flex;align-items:center;justify-content:center;transition:all .2s;}
-  .tc-del:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
-  .new-tc{background:rgba(0,212,255,.03);border:1px dashed var(--border);border-radius:4px;padding:20px;
-    cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
-    flex-direction:column;gap:8px;min-height:105px;}
-  .new-tc:hover{border-color:var(--accent);background:rgba(0,212,255,.07);}
-  .new-tc-icon{font-size:26px;}
-  .new-tc-lbl{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;color:var(--accent);}
+/* ── TOURNAMENTS ── */
+.tournaments-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:14px;}
+.tournament-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+  padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.tournament-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent);transform:scaleX(0);transition:transform .2s;}
+.tournament-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.tournament-card:hover::before{transform:scaleX(1);}
+.tc-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:5px;}
+.tc-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap;}
+.tc-cats{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.tc-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--border);margin-top:8px;}
+.tc-del{position:absolute;top:9px;right:9px;background:none;border:1px solid transparent;
+  color:var(--text-muted);width:22px;height:22px;border-radius:3px;cursor:pointer;font-size:12px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.tc-del:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
+.new-tc{background:rgba(0,212,255,.03);border:1px dashed var(--border);border-radius:4px;padding:18px;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:7px;min-height:100px;}
+.new-tc:hover{border-color:var(--accent);background:rgba(0,212,255,.07);}
+.new-tc-lbl{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--accent);}
 
-  /* TEAMS */
-  .teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px;}
-  .team-card{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
-    padding:16px;display:flex;align-items:center;transition:all .2s;position:relative;overflow:hidden;}
-  .team-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
-  .team-card:hover{border-color:var(--accent);transform:translateX(3px);}
-  .team-card.eliminated{opacity:.4;filter:grayscale(.8);}
-  .team-card.eliminated::before{background:var(--danger);}
-  .team-badge{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);
-    width:38px;height:38px;background:rgba(0,212,255,.08);border-radius:50%;
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:11px;}
-  .team-info{flex:1;min-width:0;}
-  .team-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .team-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);}
-  .btn-remove{background:none;border:1px solid transparent;color:var(--text-muted);
-    width:26px;height:26px;cursor:pointer;border-radius:3px;font-size:13px;
-    display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
-  .btn-remove:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
+/* ── CATEGORY TABS (inside pages) ── */
+.cat-bar{
+  display:flex;gap:0;margin-bottom:22px;
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  overflow-x:auto;scrollbar-width:none;padding:4px;flex-wrap:nowrap;
+}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-tab{
+  flex-shrink:0;padding:8px 16px;border-radius:3px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);background:none;border:none;transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+.cat-tab:hover{color:var(--text);background:var(--surface2);}
+.cat-tab.active{color:var(--bg);background:var(--accent);font-weight:600;}
+.cat-tab.active.fem{background:var(--accent2);}
+.cat-tab.active.mix{background:var(--accent3);color:var(--bg);}
+.cat-badge{
+  font-family:'Bebas Neue',sans-serif;font-size:11px;padding:1px 6px;border-radius:10px;
+  background:rgba(255,255,255,.15);
+}
 
-  /* FORM */
-  .form-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;}
-  .form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px;}
-  .form-group label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
-  .form-group input,.form-group select{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
-    padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
-  .form-group input:focus,.form-group select:focus{border-color:var(--accent);}
-  .form-group select option{background:var(--surface2);}
-  .btn{padding:9px 18px;border:none;border-radius:3px;cursor:pointer;font-family:'DM Sans',sans-serif;
-    font-size:13px;font-weight:600;letter-spacing:.5px;transition:all .2s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
-  .btn-primary{background:var(--accent);color:#020509;}
-  .btn-primary:hover{background:#00eeff;box-shadow:0 0 16px rgba(0,212,255,.3);}
-  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
-  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
-  .btn-danger:hover{background:var(--danger);color:#fff;}
-  .btn-success{background:var(--win);color:#020509;}
-  .btn-accent2{background:var(--accent2);color:#fff;}
-  .btn-accent2:hover{filter:brightness(1.1);}
+/* Category color pills */
+.cat-pill{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;
+  padding:2px 7px;border-radius:10px;display:inline-block;text-transform:uppercase;
+}
+.cat-pill-m{background:rgba(0,212,255,.15);color:var(--accent);}
+.cat-pill-f{background:rgba(255,107,53,.15);color:var(--accent2);}
+.cat-pill-x{background:rgba(127,255,107,.15);color:var(--accent3);}
 
-  /* MATCHES */
-  .matches-list{display:flex;flex-direction:column;gap:13px;}
-  .match-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
-    padding:16px 18px;display:flex;align-items:flex-start;gap:13px;flex-wrap:wrap;}
-  .match-card.completed{border-left:3px solid var(--accent3);}
-  .match-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);width:22px;text-align:center;flex-shrink:0;padding-top:4px;}
-  .match-body{flex:1;min-width:200px;}
-  .round-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
-    color:var(--accent2);background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);
-    padding:2px 8px;border-radius:20px;margin-bottom:9px;display:inline-block;}
-  .match-teams{display:flex;align-items:center;gap:9px;}
-  .match-team{font-weight:600;font-size:13px;flex:1;text-align:center;}
-  .match-team.winner{color:var(--win);}
-  .match-team.loser{color:var(--text-muted);text-decoration:line-through;}
-  .match-vs{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--text-muted);flex-shrink:0;}
-  .match-sets{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;}
-  .set-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
-  .set-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;}
-  .set-scores{display:flex;gap:3px;align-items:center;}
-  .score-inp{width:38px;background:var(--bg);border:1px solid var(--border);border-radius:3px;
-    padding:5px 4px;text-align:center;color:var(--text);font-family:'JetBrains Mono',monospace;
-    font-size:13px;font-weight:600;outline:none;transition:border-color .2s;}
-  .score-inp:focus{border-color:var(--accent);}
-  .score-sep{color:var(--text-muted);font-size:11px;}
-  .rem-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
-    width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:11px;
-    display:flex;align-items:center;justify-content:center;transition:all .2s;}
-  .rem-set-btn:hover{border-color:var(--danger);color:var(--danger);}
-  .add-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
-    width:24px;height:24px;border-radius:3px;cursor:pointer;font-size:15px;
-    display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
-  .add-set-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .match-actions{flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
-  .match-status{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
-  .status-pending{background:rgba(90,122,154,.15);color:var(--text-muted);}
-  .status-done{background:rgba(127,255,107,.12);color:var(--accent3);}
+/* ── CATEGORY MANAGEMENT ── */
+.cat-list{display:flex;flex-direction:column;gap:10px;}
+.cat-item{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+  padding:13px 16px;display:flex;align-items:center;gap:12px;}
+.cat-item-icon{width:36px;height:36px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;flex-shrink:0;}
+.cat-item-info{flex:1;}
+.cat-item-name{font-weight:600;font-size:14px;}
+.cat-item-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:2px;}
 
-  /* STANDINGS */
-  .standings-table{width:100%;border-collapse:collapse;}
-  .standings-table th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;
-    color:var(--text-muted);padding:8px 11px;text-align:left;border-bottom:1px solid var(--border);}
-  .standings-table td{padding:11px 11px;border-bottom:1px solid rgba(30,45,69,.5);font-size:13px;}
-  .standings-table tr:last-child td{border-bottom:none;}
-  .standings-table tr:hover td{background:rgba(0,212,255,.03);}
-  .pos-badge{font-family:'Bebas Neue',sans-serif;font-size:15px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-  .pos-1{background:rgba(255,215,0,.15);color:#ffd700}
-  .pos-2{background:rgba(192,192,192,.15);color:#c0c0c0}
-  .pos-3{background:rgba(205,127,50,.15);color:#cd7f32}
-  .pos-n{background:rgba(30,45,69,.5);color:var(--text-muted)}
-  .stat-pill{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;display:inline-block;}
-  .stat-w{background:rgba(0,230,118,.12);color:var(--win)}
-  .stat-l{background:rgba(255,56,96,.12);color:var(--lose)}
-  .stat-s{background:rgba(0,212,255,.1);color:var(--accent)}
+/* ── TEAMS ── */
+.teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.team-card{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+  padding:14px;display:flex;align-items:center;transition:all .2s;position:relative;overflow:hidden;}
+.team-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+.team-card:hover{border-color:var(--accent);transform:translateX(3px);}
+.team-card.eliminated{opacity:.4;filter:grayscale(.8);}
+.team-card.eliminated::before{background:var(--danger);}
+.team-badge{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--accent);
+  width:36px;height:36px;background:rgba(0,212,255,.08);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
+.team-info{flex:1;min-width:0;}
+.team-name{font-weight:600;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.team-meta{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);}
+.btn-remove{background:none;border:1px solid transparent;color:var(--text-muted);
+  width:24px;height:24px;cursor:pointer;border-radius:3px;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.btn-remove:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
 
-  /* PROFILE */
-  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  .profile-avatar-big{width:72px;height:72px;border-radius:50%;background:rgba(0,212,255,.1);
-    border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
-    font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);margin-bottom:14px;}
+/* ── FORM ── */
+.form-row{display:flex;gap:9px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;}
+.form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;}
+.form-group label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+.form-group input,.form-group select{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+  padding:9px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.form-group select option{background:var(--surface2);}
 
-  /* EMPTY */
-  .empty-state{text-align:center;padding:46px 20px;color:var(--text-muted);}
-  .empty-icon{font-size:42px;margin-bottom:12px;opacity:.5;}
-  .empty-msg{font-size:14px;margin-bottom:5px;}
-  .empty-sub{font-family:'JetBrains Mono',monospace;font-size:11px;}
+/* ── MATCHES ── */
+.matches-list{display:flex;flex-direction:column;gap:12px;}
+.match-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+  padding:14px 16px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.match-card.completed{border-left:3px solid var(--accent3);}
+.match-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);width:22px;text-align:center;flex-shrink:0;padding-top:3px;}
+.match-body{flex:1;min-width:190px;}
+.round-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent2);background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);
+  padding:2px 7px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.match-teams{display:flex;align-items:center;gap:8px;}
+.match-team{font-weight:600;font-size:13px;flex:1;text-align:center;}
+.match-team.winner{color:var(--win);}
+.match-team.loser{color:var(--text-muted);text-decoration:line-through;}
+.match-vs{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--text-muted);flex-shrink:0;}
+.match-sets{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.set-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.set-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;}
+.set-scores{display:flex;gap:3px;align-items:center;}
+.score-inp{width:36px;background:var(--bg);border:1px solid var(--border);border-radius:3px;
+  padding:5px 4px;text-align:center;color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:600;outline:none;transition:border-color .2s;}
+.score-inp:focus{border-color:var(--accent);}
+.score-sep{color:var(--text-muted);font-size:11px;}
+.rem-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
+  width:17px;height:17px;border-radius:50%;cursor:pointer;font-size:11px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.rem-set-btn:hover{border-color:var(--danger);color:var(--danger);}
+.add-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
+  width:22px;height:22px;border-radius:3px;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.add-set-btn:hover{border-color:var(--accent);color:var(--accent);}
+.match-actions{flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.match-status{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
+.status-pending{background:rgba(90,122,154,.15);color:var(--text-muted);}
+.status-done{background:rgba(127,255,107,.12);color:var(--accent3);}
 
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,5,9,.85);z-index:500;align-items:center;justify-content:center;}
-  .modal-overlay.open{display:flex;animation:ov-in .2s ease;}
-  @keyframes ov-in{from{opacity:0}to{opacity:1}}
-  .modal{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);
-    padding:30px;width:min(450px,95vw);animation:md-in .22s ease;}
-  @keyframes md-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;}
-  .modal .fi input{background:#060e18;}
-  .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+/* ── STANDINGS ── */
+.standings-table{width:100%;border-collapse:collapse;}
+.standings-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.standings-table td{padding:10px 10px;border-bottom:1px solid rgba(30,45,69,.5);font-size:12px;}
+.standings-table tr:last-child td{border-bottom:none;}
+.standings-table tr:hover td{background:rgba(0,212,255,.03);}
+.pos-badge{font-family:'Bebas Neue',sans-serif;font-size:14px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.pos-1{background:rgba(255,215,0,.15);color:#ffd700}.pos-2{background:rgba(192,192,192,.15);color:#c0c0c0}
+.pos-3{background:rgba(205,127,50,.15);color:#cd7f32}.pos-n{background:rgba(30,45,69,.5);color:var(--text-muted)}
+.stat-pill{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;display:inline-block;}
+.stat-w{background:rgba(0,230,118,.12);color:var(--win)}.stat-l{background:rgba(255,56,96,.12);color:var(--lose)}
+.stat-s{background:rgba(0,212,255,.1);color:var(--accent)}
 
-  /* NOTIF */
-  #notif{position:fixed;top:72px;right:20px;background:var(--surface);border:1px solid var(--accent);
-    border-left:3px solid var(--accent);padding:11px 17px;border-radius:3px;font-size:13px;z-index:9000;
-    transform:translateX(120%);transition:transform .3s ease;max-width:290px;}
-  #notif.show{transform:translateX(0);}
-  #notif.danger{border-color:var(--danger);}
+/* ── PROFILE ── */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.profile-avatar-big{width:68px;height:68px;border-radius:50%;background:rgba(0,212,255,.1);
+  border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);margin-bottom:12px;}
 
-  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:42px 20px;color:var(--text-muted);}
+.empty-icon{font-size:38px;margin-bottom:10px;opacity:.5;}
+.empty-msg{font-size:14px;margin-bottom:4px;}
+.empty-sub{font-family:'JetBrains Mono',monospace;font-size:10px;}
 
-  @media(max-width:700px){
-    header{padding:0 12px;height:auto;padding-top:10px;padding-bottom:10px;flex-wrap:wrap;gap:7px;}
-    .hdr-tournament{display:none;}
-    .page{padding:18px 13px;}
-    .box{padding:28px 20px;}
-    .profile-grid{grid-template-columns:1fr;}
-  }
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,5,9,.85);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;animation:ov-in .2s ease;}
+@keyframes ov-in{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);
+  padding:28px;width:min(480px,95vw);animation:md-in .22s ease;max-height:90vh;overflow-y:auto;}
+@keyframes md-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;}
+.modal .fi input,.modal .fi select{background:#060e18;}
+.modal-btns{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;}
+
+/* gender selector */
+.gender-row{display:flex;gap:8px;margin-bottom:14px;}
+.gender-opt{flex:1;padding:10px 6px;border-radius:3px;border:1px solid var(--border);
+  text-align:center;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:1px;
+  transition:all .2s;color:var(--text-muted);}
+.gender-opt.sel-m{border-color:var(--accent);background:rgba(0,212,255,.12);color:var(--accent);}
+.gender-opt.sel-f{border-color:var(--accent2);background:rgba(255,107,53,.12);color:var(--accent2);}
+.gender-opt.sel-x{border-color:var(--accent3);background:rgba(127,255,107,.12);color:var(--accent3);}
+
+/* age selector */
+.age-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.age-opt{padding:8px 14px;border-radius:3px;border:1px solid var(--border);
+  cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  transition:all .2s;color:var(--text-muted);}
+.age-opt.sel{border-color:var(--accent);background:rgba(0,212,255,.1);color:var(--accent);}
+
+/* ── NOTIF ── */
+#notif{position:fixed;top:70px;right:18px;background:var(--surface);border:1px solid var(--accent);
+  border-left:3px solid var(--accent);padding:11px 16px;border-radius:3px;font-size:12px;z-index:9000;
+  transform:translateX(120%);transition:transform .3s ease;max-width:280px;}
+#notif.show{transform:translateX(0);}
+#notif.danger{border-color:var(--danger);}
+
+/* ── CAT OVERVIEW GRID ── */
+.cat-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px;}
+.cat-overview-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;cursor:pointer;transition:all .2s;}
+.cat-overview-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.co-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:6px;}
+.co-stats{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);display:flex;gap:10px;}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:700px){
+  header{padding:0 11px;height:auto;padding-top:9px;padding-bottom:9px;flex-wrap:wrap;gap:7px;}
+  .hdr-tournament{display:none;}.page{padding:16px 12px;}
+  .box{padding:26px 18px;}.profile-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -302,32 +361,31 @@
   <div class="box">
     <div class="box-logo">NEWCOM</div>
     <div class="box-sub">Tournament Management System v2.1</div>
-    <div class="box-title">// Acuerdo de licencia de uso</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">// Acuerdo de licencia</div>
     <div class="lic-text">
-LICENCIA DE USO NEWCOM TOURNAMENT MANAGEMENT SYSTEM
-2026 Newcom
+LICENCIA DE USO — NEWCOM TOURNAMENT MANAGEMENT SYSTEM v2.1 | © 2025 Newcom Technologies
 
-Al activar esta licencia, el usuario acepta los siguientes terminos:
+Este software es propiedad exclusiva de Newcom Technologies. Al activar esta licencia, el usuario acepta los siguientes términos:
 
-1. OTORGAMIENTO DE LICENCIA.Al Licenciatario una licencia no exclusiva, intransferible y revocable para utilizar este software unicamente para la organizacion y gestion de torneos deportivos en el marco de actividades autorizadas.
+1. OTORGAMIENTO DE LICENCIA. Newcom Technologies otorga al Licenciatario una licencia no exclusiva, intransferible y revocable para utilizar este software únicamente para la organización y gestión de torneos deportivos en el marco de actividades autorizadas.
 
-2. RESTRICCIONES. Queda expresamente prohibido: (a) copiar, modificar, distribuir, vender o sublicenciar el software; (b) realizar ingeniera inversa o descompilar el cdigo fuente; (c) utilizar el software para fines comerciales sin autorizacion; (d) remover o alterar avisos de propiedad intelectual.
+2. RESTRICCIONES. Queda expresamente prohibido: (a) copiar, modificar, distribuir, vender o sublicenciar el software; (b) realizar ingeniería inversa o descompilar el código fuente; (c) utilizar el software para fines comerciales sin autorización escrita de Newcom Technologies.
 
-3. PROPIEDAD INTELECTUAL. El software, incluyendo su diseño, estructura, codigo y documentacion, es propiedad exclusiva y esta protegido por las leyes de propiedad intelectual vigentes.
+3. PROPIEDAD INTELECTUAL. El software, incluyendo su diseño, estructura, código y documentación, es propiedad exclusiva de Newcom Technologies.
 
-4. DATOS. El Licenciatario es responsable de la exactitud de los datos ingresados. Jeremias Reinoso no asume responsabilidad por perdida de datos derivada del uso del software.
+4. LIMITACIÓN DE RESPONSABILIDAD. En ningún caso Newcom Technologies será responsable por daños derivados del uso del software.
 
-5. VIGENCIA. Esta licencia es valida mientras el usuario cumpla los terminos aqui establecidos. Jeremias Reinoso se reserva el derecho de revocar la licencia ante cualquier incumplimiento.
+5. VIGENCIA. Esta licencia es válida mientras el usuario cumpla los términos aquí establecidos.
     </div>
     <div class="lic-check">
       <input type="checkbox" id="lic-check">
-      <label for="lic-check">He leido y acepto los terminos del acuerdo de licencia</label>
+      <label for="lic-check">He leído y acepto los términos del acuerdo de licencia</label>
     </div>
-    <div class="box-title">// Clave de activacion</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">// Clave de activación</div>
     <input type="text" class="lic-key-inp" id="lic-key" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19">
     <div class="err-msg" id="lic-err"></div>
     <button class="btn-full" onclick="activateLicense()">ACTIVAR SISTEMA</button>
-    <div class="box-version">NEWCOM TMS  BUILD 2026.1  ALL RIGHTS RESERVED</div>
+    <div class="box-version">NEWCOM TMS • BUILD 2025.1 • ALL RIGHTS RESERVED</div>
   </div>
 </div>
 
@@ -336,14 +394,14 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
   <div class="screen-bg"></div><div class="screen-grid"></div>
   <div class="box">
     <div class="box-logo">NEWCOM</div>
-    <div class="box-sub">Sistema de Gestión de Torneos</div>
+    <div class="box-sub">Tournament Management System</div>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar Sesion</button>
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar Sesión</button>
       <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Registrarse</button>
     </div>
     <div id="form-login">
       <div class="fi"><label>Email</label><input type="email" id="login-email" placeholder="usuario@ejemplo.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="fi"><label>Contraseña</label><input type="password" id="login-pass" placeholder="******" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fi"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="err-msg" id="login-err"></div>
       <button class="btn-full" id="btn-login" onclick="doLogin()">INGRESAR</button>
     </div>
@@ -354,7 +412,7 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
       <div class="err-msg" id="reg-err"></div>
       <button class="btn-full" id="btn-register" onclick="doRegister()">CREAR CUENTA</button>
     </div>
-    <div class="box-version" style="margin-top:18px;">Licencia activada ?</div>
+    <div class="box-version" style="margin-top:16px;">Licencia activada ✓</div>
   </div>
 </div>
 
@@ -363,11 +421,12 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
   <header>
     <div class="hdr-logo">NEW<span>COM</span></div>
     <div class="hdr-tournament" id="hdr-tournament" style="display:none">
-      <div class="hdr-tname-wrap"><span>Torneo activo</span><strong id="hdr-tname"></strong></div>
-      <button class="btn btn-secondary" style="font-size:11px;padding:5px 9px;" onclick="goToTournaments()">? Torneos</button>
+      <div class="hdr-tname-wrap"><span>Torneo activo</span><strong id="hdr-tname">—</strong></div>
+      <button class="btn btn-secondary btn-sm" onclick="goToTournaments()">⬅ Torneos</button>
     </div>
     <nav class="hdr-nav" id="hdr-nav" style="display:none">
       <button class="nav-btn active" onclick="showPage('dashboard',event)">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('categories',event)">Categorías</button>
       <button class="nav-btn" onclick="showPage('teams',event)">Equipos</button>
       <button class="nav-btn" onclick="showPage('matches',event)">Partidos</button>
       <button class="nav-btn" onclick="showPage('standings',event)">Posiciones</button>
@@ -379,10 +438,10 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
     </div>
   </header>
 
-  <!-- TOURNAMENTS PAGE -->
+  <!-- TOURNAMENTS -->
   <div class="page active" id="page-tournaments">
     <div class="page-title">MIS <span>TORNEOS</span></div>
-    <div class="page-desc">// Selecciona un torneo o crea uno nuevo</div>
+    <div class="page-desc">// Seleccioná un torneo o creá uno nuevo</div>
     <div class="tournaments-grid" id="tournaments-grid"></div>
   </div>
 
@@ -391,49 +450,122 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
     <div class="page-title">PANEL <span>PRINCIPAL</span></div>
     <div class="page-desc" id="dash-desc">// Resumen del torneo</div>
     <div class="stats-row" id="stats-row"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-      <div class="card"><div class="card-title">Ultimos Resultados</div><div id="dash-recent"></div></div>
-      <div class="card"><div class="card-title">Lideres</div><div id="dash-leaders"></div></div>
+    <!-- Category overview cards -->
+    <div class="card">
+      <div class="card-title">Categorías del Torneo</div>
+      <div class="cat-overview" id="dash-cats"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card"><div class="card-title">Últimos Resultados</div><div id="dash-recent"></div></div>
+      <div class="card"><div class="card-title">Líderes por Categoría</div><div id="dash-leaders"></div></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES MANAGEMENT -->
+  <div class="page" id="page-categories">
+    <div class="page-title">GESTIÓN DE <span>CATEGORÍAS</span></div>
+    <div class="page-desc">// Agregá las categorías del torneo (edad + género)</div>
+    <div class="card">
+      <div class="card-title">Agregar Categoría</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Franja Etaria</div>
+        <div class="age-row" id="age-row">
+          <div class="age-opt" onclick="selectAge('+40',this)">+40</div>
+          <div class="age-opt" onclick="selectAge('+50',this)">+50</div>
+          <div class="age-opt" onclick="selectAge('+60',this)">+60</div>
+          <div class="age-opt" onclick="selectAge('+68',this)">+68</div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Género</div>
+        <div class="gender-row" id="gender-row">
+          <div class="gender-opt" onclick="selectGender('Masculino',this)">♂ Masculino</div>
+          <div class="gender-opt" onclick="selectGender('Femenino',this)">♀ Femenino</div>
+          <div class="gender-opt" onclick="selectGender('Mixto',this)">⚡ Mixto</div>
+        </div>
+      </div>
+      <div class="err-msg" id="cat-err"></div>
+      <button class="btn btn-primary" onclick="addCategory()">＋ Agregar Categoría</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Categorías Activas</div>
+      <div class="cat-list" id="cat-list"></div>
     </div>
   </div>
 
   <!-- TEAMS -->
   <div class="page" id="page-teams">
-    <div class="page-title">GESTION DE <span>EQUIPOS</span></div>
-    <div class="page-desc">// Agregar, editar y retirar equipos</div>
+    <div class="page-title">GESTIÓN DE <span>EQUIPOS</span></div>
+    <div class="page-desc">// Equipos organizados por categoría</div>
     <div class="card">
       <div class="card-title">Agregar Equipo</div>
       <div class="form-row">
-        <div class="form-group"><label>Nombre del equipo</label><input type="text" id="inp-team-name" placeholder="Ej: UAKEN" onkeydown="if(event.key==='Enter')addTeam()"></div>
-        <div class="form-group" style="max-width:130px;"><label>Siglas</label><input type="text" id="inp-team-abbr" placeholder="UAK" maxlength="3" style="text-transform:uppercase"></div>
-        <button class="btn btn-primary" onclick="addTeam()">+ Agregar</button>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="inp-team-cat"></select>
+        </div>
+        <div class="form-group">
+          <label>Nombre del equipo</label>
+          <input type="text" id="inp-team-name" placeholder="Ej: Los Águilas" onkeydown="if(event.key==='Enter')addTeam()">
+        </div>
+        <div class="form-group" style="max-width:120px;">
+          <label>Siglas</label>
+          <input type="text" id="inp-team-abbr" placeholder="ÁGL" maxlength="3" style="text-transform:uppercase">
+        </div>
+        <button class="btn btn-primary" onclick="addTeam()">＋ Agregar</button>
       </div>
     </div>
-    <div class="card"><div class="card-title">Equipos Registrados</div><div class="teams-grid" id="teams-grid"></div></div>
+    <!-- Category tabs for teams -->
+    <div class="cat-bar" id="teams-cat-bar"></div>
+    <div class="card">
+      <div class="card-title" id="teams-cat-title">Equipos</div>
+      <div class="teams-grid" id="teams-grid"></div>
+    </div>
   </div>
 
   <!-- MATCHES -->
   <div class="page" id="page-matches">
     <div class="page-title">PARTIDOS Y <span>RESULTADOS</span></div>
-    <div class="page-desc">// Emparejamiento y carga de marcadores por sets</div>
+    <div class="page-desc">// Solo se pueden emparejar equipos de la misma categoría</div>
     <div class="card">
       <div class="card-title">Generar Emparejamiento</div>
       <div class="form-row">
-        <div class="form-group"><label>Equipo 1</label><select id="sel-team1"><option value=""> seleccionar</option></select></div>
-        <div class="form-group"><label>Equipo 2</label><select id="sel-team2"><option value=""> seleccionar</option></select></div>
-        <div class="form-group" style="max-width:175px;"><label>Ronda / Fase</label><input type="text" id="inp-round" placeholder="Ej: Fase de grupos"></div>
-        <button class="btn btn-accent2" onclick="createMatch()">? Crear Partido</button>
-        <button class="btn btn-secondary" onclick="autoMatch()">?? Auto-emparejar</button>
+        <div class="form-group" style="max-width:180px;">
+          <label>Categoría</label>
+          <select id="sel-match-cat" onchange="onMatchCatChange()"></select>
+        </div>
+        <div class="form-group">
+          <label>Equipo 1</label>
+          <select id="sel-team1"><option value="">— seleccionar —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Equipo 2</label>
+          <select id="sel-team2"><option value="">— seleccionar —</option></select>
+        </div>
+        <div class="form-group" style="max-width:160px;">
+          <label>Ronda / Fase</label>
+          <input type="text" id="inp-round" placeholder="Ej: Grupos">
+        </div>
+        <button class="btn btn-accent2" onclick="createMatch()">⚡ Crear</button>
+        <button class="btn btn-secondary" onclick="autoMatch()">🔀 Auto</button>
       </div>
     </div>
-    <div class="card"><div class="card-title">Lista de Partidos</div><div class="matches-list" id="matches-list"></div></div>
+    <!-- Category tabs for matches -->
+    <div class="cat-bar" id="matches-cat-bar"></div>
+    <div class="card">
+      <div class="card-title" id="matches-cat-title">Partidos</div>
+      <div class="matches-list" id="matches-list"></div>
+    </div>
   </div>
 
   <!-- STANDINGS -->
   <div class="page" id="page-standings">
     <div class="page-title">TABLA DE <span>POSICIONES</span></div>
-    <div class="page-desc">// Clasificacion general del torneo</div>
+    <div class="page-desc">// Clasificación por categoría</div>
+    <!-- Category tabs for standings -->
+    <div class="cat-bar" id="standings-cat-bar"></div>
     <div class="card">
+      <div class="card-title" id="standings-cat-title">Posiciones</div>
       <table class="standings-table">
         <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>P</th><th>Sets G</th><th>Sets P</th><th>Pts</th></tr></thead>
         <tbody id="standings-body"></tbody>
@@ -444,17 +576,17 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="page-title">MI <span>PERFIL</span></div>
-    <div class="page-desc">// Informacion de tu cuenta</div>
+    <div class="page-desc">// Información de tu cuenta</div>
     <div class="profile-grid">
       <div class="card">
         <div class="card-title">Cuenta</div>
         <div class="profile-avatar-big" id="profile-avatar">?</div>
-        <div style="font-size:17px;font-weight:600;margin-bottom:7px;" id="profile-name"></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-bottom:4px;" id="profile-email"></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);" id="profile-since"></div>
-        <div style="margin-top:20px;"><button class="btn-full danger-btn" onclick="doLogout()">CERRAR SESION</button></div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px;" id="profile-name">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:3px;" id="profile-email">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--border);" id="profile-since">—</div>
+        <div style="margin-top:18px;"><button class="btn-full danger-btn" onclick="doLogout()">CERRAR SESIÓN</button></div>
       </div>
-      <div class="card"><div class="card-title">Estadisticas Globales</div><div id="profile-stats"></div></div>
+      <div class="card"><div class="card-title">Estadísticas Globales</div><div id="profile-stats"></div></div>
     </div>
   </div>
 </div>
@@ -464,7 +596,7 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
   <div class="modal">
     <div class="modal-title">Nuevo Torneo</div>
     <div class="fi"><label>Nombre del torneo</label><input type="text" id="inp-tname" placeholder="Ej: Copa Primavera 2025" onkeydown="if(event.key==='Enter')confirmNewTournament()"></div>
-    <div class="fi"><label>Deporte / Categoria</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol  Masculino"></div>
+    <div class="fi"><label>Deporte</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol"></div>
     <div class="err-msg" id="tournament-err"></div>
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="closeModal('modal-new-tournament')">Cancelar</button>
@@ -473,7 +605,7 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
   </div>
 </div>
 
-<!-- MODAL: confirmacion -->
+<!-- MODAL: confirmación -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal">
     <div class="modal-title" id="mc-title">Confirmar</div>
@@ -488,250 +620,248 @@ Al activar esta licencia, el usuario acepta los siguientes terminos:
 <div id="notif"></div>
 
 <script>
-/* --------------------------------------------
-   ??  CONFIGURACION SUPABASE
-   Reemplaza estos dos valores con los de tu proyecto en supabase.com
--------------------------------------------- */
-const SUPABASE_URL     = 'https://TU_PROYECTO.supabase.co';
+/* ════════════════════════════════════════════
+   ⚙️  CONFIGURACIÓN SUPABASE
+   Reemplazá con los valores de tu proyecto en supabase.com
+════════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://TU_PROYECTO.supabase.co';
 const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI';
 
-/* --------------------------------------------
-   INIT
--------------------------------------------- */
+/* ════════════════════════════════════════════
+   CONSTANTES DE CATEGORÍAS
+════════════════════════════════════════════ */
+const AGE_GROUPS  = ['+40','+50','+60','+68'];
+const GENDERS     = ['Masculino','Femenino','Mixto'];
+
+const GENDER_CLASS = { Masculino:'m', Femenino:'f', Mixto:'x' };
+const GENDER_COLOR = { Masculino:'var(--accent)', Femenino:'var(--accent2)', Mixto:'var(--accent3)' };
+const GENDER_BG    = { Masculino:'rgba(0,212,255,.12)', Femenino:'rgba(255,107,53,.12)', Mixto:'rgba(127,255,107,.12)' };
+const GENDER_ICON  = { Masculino:'♂', Femenino:'♀', Mixto:'⚡' };
+
+function catKey(age, gender) { return `${age}_${gender}`; }
+function catLabel(age, gender) { return `${age} ${GENDER_ICON[gender]} ${gender}`; }
+
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const VALID_KEYS = ['NEWC-2025-TOUR-001','DEMO-DEMO-DEMO-000','NCMT-2025-PREM-999','NEWC-BETA-TEST-100'];
 
-let currentUser = null;
+let currentUser       = null;
 let currentTournament = null;
-let state = { teams:[], matches:[], matchCounter:1 };
+// state.categories = [{id, age, gender}]
+// state.teams      = [{id, name, abbr, categoryId, active}]
+// state.matches    = [{id, t1, t2, categoryId, round, sets, status, winner}]
+let state = { categories:[], teams:[], matches:[], matchCounter:1 };
+
+// Active category tab per section
+let activeTab = { teams: null, matches: null, standings: null };
+
+// Temp selections for new category
+let newCatAge    = null;
+let newCatGender = null;
 
 function isConfigured() {
   return !SUPABASE_URL.includes('TU_PROYECTO') && !SUPABASE_ANON_KEY.includes('TU_ANON_KEY');
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    BOOT
--------------------------------------------- */
+════════════════════════════════════════════ */
 async function boot() {
   show('loading-screen');
   const licOk = localStorage.getItem('newcom_lic');
-
   if (!isConfigured()) {
-    // MODO DEMO: sin Supabase, todo en localStorage
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r=>setTimeout(r,500));
     hide('loading-screen');
-    if (!licOk) { show('license-screen'); return; }
-    currentUser = { id:'demo', email:'demo@newcom.local', user_metadata:{ name:'Usuario Demo' }, created_at: new Date().toISOString() };
-    showApp();
-    return;
+    if (!licOk){ show('license-screen'); return; }
+    currentUser={id:'demo',email:'demo@newcom.local',user_metadata:{name:'Usuario Demo'},created_at:new Date().toISOString()};
+    showApp(); return;
   }
-
-  const { data:{ session } } = await db.auth.getSession();
+  const {data:{session}} = await db.auth.getSession();
   hide('loading-screen');
-  if (!licOk) { show('license-screen'); return; }
-  if (session?.user) { currentUser = session.user; showApp(); }
+  if (!licOk){ show('license-screen'); return; }
+  if (session?.user){ currentUser=session.user; showApp(); }
   else show('auth-screen');
 }
 
-function show(id) { document.getElementById(id).classList.remove('hidden'); }
-function hide(id) { document.getElementById(id).classList.add('hidden'); }
-
-function fadeOut(id, cb) {
-  const el = document.getElementById(id);
-  el.style.transition='opacity .4s'; el.style.opacity='0';
-  setTimeout(()=>{ hide(id); el.style.opacity=''; el.style.transition=''; cb&&cb(); }, 420);
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function fadeOut(id,cb){
+  const el=document.getElementById(id);
+  el.style.transition='opacity .4s';el.style.opacity='0';
+  setTimeout(()=>{hide(id);el.style.opacity='';el.style.transition='';cb&&cb();},420);
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    LICENSE
--------------------------------------------- */
-document.getElementById('lic-key').addEventListener('input', function() {
-  let v = this.value.replace(/[^A-Z0-9a-z]/g,'').toUpperCase();
-  let p=[]; for(let i=0;i<v.length&&i<16;i+=4) p.push(v.slice(i,i+4));
-  this.value = p.join('-');
+════════════════════════════════════════════ */
+document.getElementById('lic-key').addEventListener('input',function(){
+  let v=this.value.replace(/[^A-Z0-9a-z]/g,'').toUpperCase();
+  let p=[];for(let i=0;i<v.length&&i<16;i+=4)p.push(v.slice(i,i+4));
+  this.value=p.join('-');
 });
-
-function activateLicense() {
-  const checked = document.getElementById('lic-check').checked;
-  const key = document.getElementById('lic-key').value.trim().toUpperCase();
-  const err = document.getElementById('lic-err');
-  if (!checked) { err.textContent='? Debe aceptar los terminos de licencia'; return; }
-  if (!key) { err.textContent='? Ingrese la clave de activacion'; return; }
-  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activacion invalida'; return; }
+function activateLicense(){
+  const checked=document.getElementById('lic-check').checked;
+  const key=document.getElementById('lic-key').value.trim().toUpperCase();
+  const err=document.getElementById('lic-err');
+  if(!checked){err.textContent='⚠ Debe aceptar los términos';return;}
+  if(!key){err.textContent='⚠ Ingrese la clave';return;}
+  if(!VALID_KEYS.includes(key)){err.textContent='✗ Clave inválida';return;}
   localStorage.setItem('newcom_lic','1');
-  fadeOut('license-screen', () => {
-    if (!isConfigured()) {
-      currentUser = { id:'demo', email:'demo@newcom.local', user_metadata:{name:'Usuario Demo'}, created_at:new Date().toISOString() };
+  fadeOut('license-screen',()=>{
+    if(!isConfigured()){
+      currentUser={id:'demo',email:'demo@newcom.local',user_metadata:{name:'Usuario Demo'},created_at:new Date().toISOString()};
       showApp();
     } else show('auth-screen');
   });
 }
-/* --------------------------------------------
+
+/* ════════════════════════════════════════════
    AUTH
--------------------------------------------- */
-function switchTab(tab) {
-  document.getElementById('form-login').style.display = tab==='login'?'':'none';
-  document.getElementById('form-register').style.display = tab==='register'?'':'none';
-  document.getElementById('tab-login').classList.toggle('active', tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+════════════════════════════════════════════ */
+function switchTab(tab){
+  document.getElementById('form-login').style.display=tab==='login'?'':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'':'none';
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
 }
-
-async function doLogin() {
+async function doLogin(){
   const email=document.getElementById('login-email').value.trim();
-  const pass =document.getElementById('login-pass').value;
-  const err  =document.getElementById('login-err');
-  err.textContent='';
-  if (!email||!pass) { err.textContent='Completa todos los campos'; return; }
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-err'); err.textContent='';
+  if(!email||!pass){err.textContent='Completá todos los campos';return;}
   const btn=document.getElementById('btn-login'); btn.disabled=true; btn.textContent='INGRESANDO...';
-  const { data, error } = await db.auth.signInWithPassword({ email, password:pass });
+  const{data,error}=await db.auth.signInWithPassword({email,password:pass});
   btn.disabled=false; btn.textContent='INGRESAR';
-  if (error) { err.textContent='? '+authErr(error.message); return; }
-  currentUser=data.user;
-  fadeOut('auth-screen', showApp);
+  if(error){err.textContent='✗ '+authErr(error.message);return;}
+  currentUser=data.user; fadeOut('auth-screen',showApp);
 }
-
-async function doRegister() {
-  const name =document.getElementById('reg-name').value.trim();
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
   const email=document.getElementById('reg-email').value.trim();
-  const pass =document.getElementById('reg-pass').value;
-  const err  =document.getElementById('reg-err');
-  err.textContent='';
-  if (!name||!email||!pass) { err.textContent='Completa todos los campos'; return; }
-  if (pass.length<6) { err.textContent='La contraseña debe tener al menos 6 caracteres'; return; }
+  const pass=document.getElementById('reg-pass').value;
+  const err=document.getElementById('reg-err'); err.textContent='';
+  if(!name||!email||!pass){err.textContent='Completá todos los campos';return;}
+  if(pass.length<6){err.textContent='Contraseña mínimo 6 caracteres';return;}
   const btn=document.getElementById('btn-register'); btn.disabled=true; btn.textContent='CREANDO...';
-  const { data, error } = await db.auth.signUp({ email, password:pass, options:{data:{name}} });
+  const{data,error}=await db.auth.signUp({email,password:pass,options:{data:{name}}});
   btn.disabled=false; btn.textContent='CREAR CUENTA';
-  if (error) { err.textContent='? '+authErr(error.message); return; }
-  if (data.user && !data.session) {
-    err.style.color='var(--win)';
-    err.textContent='? Cuenta creada. Revisa tu email para confirmar.';
-    return;
-  }
-  currentUser=data.user;
-  fadeOut('auth-screen', showApp);
+  if(error){err.textContent='✗ '+authErr(error.message);return;}
+  if(data.user&&!data.session){err.style.color='var(--win)';err.textContent='✓ Revisá tu email para confirmar.';return;}
+  currentUser=data.user; fadeOut('auth-screen',showApp);
 }
-
-async function doLogout() {
-  if (isConfigured()) await db.auth.signOut();
-  currentUser=null; currentTournament=null; state={teams:[],matches:[],matchCounter:1};
-  const app=document.getElementById('app'); app.classList.remove('visible'); app.style.display='none';
+async function doLogout(){
+  if(isConfigured())await db.auth.signOut();
+  currentUser=null;currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};
+  const app=document.getElementById('app');app.classList.remove('visible');app.style.display='none';
   show('auth-screen');
 }
-
-function authErr(msg) {
-  if (msg.includes('Invalid login')) return 'Email o contraseña incorrectos';
-  if (msg.includes('already registered')) return 'Este email ya está registrado';
-  if (msg.includes('Password should')) return 'La contraseña debe tener al menos 6 caracteres';
-  return msg;
+function authErr(m){
+  if(m.includes('Invalid login'))return 'Email o contraseña incorrectos';
+  if(m.includes('already registered'))return 'Email ya registrado';
+  if(m.includes('Password should'))return 'Contraseña mínimo 6 caracteres';
+  return m;
 }
 
-/* --------------------------------------------
-   APP INIT
--------------------------------------------- */
-function showApp() {
+/* ════════════════════════════════════════════
+   APP
+════════════════════════════════════════════ */
+function showApp(){
   const app=document.getElementById('app');
   app.style.display='block';
   setTimeout(()=>app.classList.add('visible'),10);
-  const name = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || '?';
-  const ini = name.slice(0,2).toUpperCase();
-  document.getElementById('hdr-avatar').textContent = ini;
-  document.getElementById('hdr-uname').textContent = name;
+  const name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'?';
+  document.getElementById('hdr-avatar').textContent=name.slice(0,2).toUpperCase();
+  document.getElementById('hdr-uname').textContent=name;
   goToTournaments();
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    TOURNAMENTS
--------------------------------------------- */
-async function goToTournaments() {
-  currentTournament=null; state={teams:[],matches:[],matchCounter:1};
+════════════════════════════════════════════ */
+function getTKey(){return 'newcom_t_'+currentUser.id;}
+async function goToTournaments(){
+  currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};
   document.getElementById('hdr-tournament').style.display='none';
   document.getElementById('hdr-nav').style.display='none';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-tournaments').classList.add('active');
   await loadTournaments();
 }
-
-function getTournamentsKey() { return 'newcom_t_'+currentUser.id; }
-async function loadTournaments() {
+async function loadTournaments(){
   const grid=document.getElementById('tournaments-grid');
-  grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px 0;">Cargando...</div>';
+  grid.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:14px;">Cargando...</div>';
   let list=[];
-  if (isConfigured()) {
-    const { data }=await db.from('tournaments').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(isConfigured()){
+    const{data}=await db.from('tournaments').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
     list=data||[];
-  } else {
-    const raw=localStorage.getItem(getTournamentsKey());
+  }else{
+    const raw=localStorage.getItem(getTKey());
     list=raw?JSON.parse(raw):[];
   }
-  grid.innerHTML='';
-  grid.innerHTML+=`<div class="new-tc" onclick="openNewTournamentModal()"><div class="new-tc-icon">+</div><div class="new-tc-lbl">Nuevo Torneo</div></div>`;
-  if (!list.length) {
-    grid.innerHTML+=`<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">??</div><div class="empty-msg">No tenes torneos creados</div><div class="empty-sub">Crea tu primer torneo</div></div>`;
+  grid.innerHTML=`<div class="new-tc" onclick="openNewTournamentModal()"><div style="font-size:24px;">＋</div><div class="new-tc-lbl">Nuevo Torneo</div></div>`;
+  if(!list.length){
+    grid.innerHTML+=`<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">🏆</div><div class="empty-msg">No tenés torneos creados</div></div>`;
     return;
   }
   list.forEach(t=>{
+    const cats=t.data?.categories||[];
     const teams=(t.data?.teams?.filter(x=>x.active).length)||0;
     const done=(t.data?.matches?.filter(x=>x.status==='done').length)||0;
     const total=(t.data?.matches?.length)||0;
     const date=new Date(t.created_at||Date.now()).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
-    const tJson = JSON.stringify(t).replace(/"/g,'&quot;');
+    const catPills=cats.map(c=>`<span class="cat-pill cat-pill-${GENDER_CLASS[c.gender]}">${c.age} ${GENDER_ICON[c.gender]}</span>`).join('');
+    const tJson=JSON.stringify(t).replace(/"/g,'&quot;');
     grid.innerHTML+=`
       <div class="tournament-card" onclick="selectTournament(this)" data-t="${tJson}">
-        <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')" title="Eliminar">?</button>
+        <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')">✕</button>
         <div class="tc-name">${t.name}</div>
-        <div class="tc-meta">
-          <span>? ${t.sport||'�'}</span>
-          <span>?? ${teams} equipos</span>
-          <span>?? ${done}/${total} partidos</span>
-        </div>
-        <div class="tc-date">Creado el ${date}</div>
+        <div class="tc-meta"><span>⚽ ${t.sport||'—'}</span><span>👥 ${teams} equipos</span><span>📋 ${done}/${total}</span></div>
+        <div class="tc-cats">${catPills||'<span style="font-size:10px;color:var(--text-muted);">Sin categorías</span>'}</div>
+        <div class="tc-date">Creado ${date}</div>
       </div>`;
   });
 }
-
-function openNewTournamentModal() {
+function openNewTournamentModal(){
   document.getElementById('inp-tname').value='';
   document.getElementById('inp-tsport').value='';
   document.getElementById('tournament-err').textContent='';
   openModal('modal-new-tournament');
   setTimeout(()=>document.getElementById('inp-tname').focus(),100);
 }
-
-async function confirmNewTournament() {
-  const name =document.getElementById('inp-tname').value.trim();
+async function confirmNewTournament(){
+  const name=document.getElementById('inp-tname').value.trim();
   const sport=document.getElementById('inp-tsport').value.trim();
-  const err  =document.getElementById('tournament-err');
-  if (!name) { err.textContent='Ingresa el nombre del torneo'; return; }
-  const t={
-    id: Date.now().toString(), name, sport,
-    user_id: currentUser.id,
-    created_at: new Date().toISOString(),
-    data: { teams:[], matches:[], matchCounter:1 }
-  };
-  if (isConfigured()) {
-    const { error }=await db.from('tournaments').insert([{ id:t.id, name, sport, user_id:t.user_id, created_at:t.created_at, data:t.data }]);
-    if (error) { err.textContent='Error: '+error.message; return; }
-  } else {
-    const raw=localStorage.getItem(getTournamentsKey());
-    const list=raw?JSON.parse(raw):[];
-    list.unshift(t);
-    localStorage.setItem(getTournamentsKey(),JSON.stringify(list));
+  const err=document.getElementById('tournament-err');
+  if(!name){err.textContent='Ingresá el nombre';return;}
+  const t={id:Date.now().toString(),name,sport,user_id:currentUser.id,
+    created_at:new Date().toISOString(),
+    data:{categories:[],teams:[],matches:[],matchCounter:1}};
+  if(isConfigured()){
+    const{error}=await db.from('tournaments').insert([{id:t.id,name,sport,user_id:t.user_id,created_at:t.created_at,data:t.data}]);
+    if(error){err.textContent='Error: '+error.message;return;}
+  }else{
+    const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
+    list.unshift(t);localStorage.setItem(getTKey(),JSON.stringify(list));
   }
   closeModal('modal-new-tournament');
-  notify('Torneo "'+name+'" creado ?');
+  notify('Torneo "'+name+'" creado ✓');
   selectTournamentObj(t);
 }
-
-function selectTournament(el) {
-  try { selectTournamentObj(JSON.parse(el.dataset.t)); } catch(e){}
-}
-
-function selectTournamentObj(t) {
+function selectTournament(el){ try{selectTournamentObj(JSON.parse(el.dataset.t));}catch(e){} }
+function selectTournamentObj(t){
   currentTournament=t;
-  state=t.data||{teams:[],matches:[],matchCounter:1};
-  if (!state.matchCounter) state.matchCounter=1;
+  state=t.data||{categories:[],teams:[],matches:[],matchCounter:1};
+  if(!state.categories)state.categories=[];
+  if(!state.matchCounter)state.matchCounter=1;
+  // Set default active tabs
+  const firstCat=state.categories[0];
+  activeTab.teams=firstCat?firstCat.id:null;
+  activeTab.matches=firstCat?firstCat.id:null;
+  activeTab.standings=firstCat?firstCat.id:null;
   document.getElementById('hdr-tname').textContent=t.name;
   document.getElementById('hdr-tournament').style.display='flex';
   document.getElementById('hdr-nav').style.display='flex';
@@ -740,79 +870,194 @@ function selectTournamentObj(t) {
   document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderAll();
 }
-
-async function deleteTournament(id) {
-  openConfirm('Eliminar torneo','¿Eliminar este torneo? Se perderan todos los datos.',async()=>{
-    if (isConfigured()) {
-      await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id);
-    } else {
-      const raw=localStorage.getItem(getTournamentsKey());
-      const list=raw?JSON.parse(raw):[];
-      localStorage.setItem(getTournamentsKey(),JSON.stringify(list.filter(t=>t.id!==id)));
+async function deleteTournament(id){
+  openConfirm('Eliminar torneo','¿Eliminar este torneo y todos sus datos?',async()=>{
+    if(isConfigured()){await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id);}
+    else{
+      const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
+      localStorage.setItem(getTKey(),JSON.stringify(list.filter(t=>t.id!==id)));
     }
-    notify('Torneo eliminado');
-    loadTournaments();
+    notify('Torneo eliminado');loadTournaments();
   });
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    SAVE
--------------------------------------------- */
-async function save() {
-  if (!currentTournament) return;
+════════════════════════════════════════════ */
+async function save(){
+  if(!currentTournament)return;
   currentTournament.data=state;
-  if (isConfigured()) {
+  if(isConfigured()){
     await db.from('tournaments').update({data:state}).eq('id',currentTournament.id);
-  } else {
-    const raw=localStorage.getItem(getTournamentsKey());
-    const list=raw?JSON.parse(raw):[];
+  }else{
+    const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
     const idx=list.findIndex(t=>t.id===currentTournament.id);
-    if (idx>=0) list[idx].data=state; else list.unshift(currentTournament);
-    localStorage.setItem(getTournamentsKey(),JSON.stringify(list));
+    if(idx>=0)list[idx].data=state;else list.unshift(currentTournament);
+    localStorage.setItem(getTKey(),JSON.stringify(list));
   }
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    NAVIGATION
--------------------------------------------- */
-function showPage(id, event) {
+════════════════════════════════════════════ */
+function showPage(id,event){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  if (event?.currentTarget?.classList?.contains('nav-btn')) event.currentTarget.classList.add('active');
-  if (id==='matches') renderMatchSelects();
-  if (id==='profile') renderProfile();
-  renderAll();
+  if(event?.currentTarget?.classList?.contains('nav-btn'))event.currentTarget.classList.add('active');
+  if(id==='teams'){renderCatBar('teams-cat-bar','teams');renderTeamCatSelect();renderTeams();}
+  if(id==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();}
+  if(id==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
+  if(id==='categories'){renderCategories();}
+  if(id==='profile')renderProfile();
+  if(id==='dashboard')renderDashboard();
 }
 
-/* --------------------------------------------
-   TEAMS
--------------------------------------------- */
-async function addTeam() {
-  const name=document.getElementById('inp-team-name').value.trim();
-  const abbr=document.getElementById('inp-team-abbr').value.trim().toUpperCase()||name.slice(0,3).toUpperCase();
-  if (!name){notify('Ingresa el nombre del equipo',true);return;}
-  if (state.teams.find(t=>t.name.toLowerCase()===name.toLowerCase())){notify('Ya existe ese equipo',true);return;}
-  state.teams.push({id:Date.now(),name,abbr,active:true});
-  document.getElementById('inp-team-name').value='';
-  document.getElementById('inp-team-abbr').value='';
-  await save(); renderAll();
-  notify(`Equipo "${name}" agregado ?`);
+/* ════════════════════════════════════════════
+   CATEGORIES
+════════════════════════════════════════════ */
+function selectAge(age,el){
+  newCatAge=age;
+  document.querySelectorAll('.age-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
 }
-
-function removeTeam(id) {
-  const t=state.teams.find(t=>t.id===id);
-  openConfirm('Retirar equipo',`¿Retirar al equipo <strong>${t.name}</strong>?`,async()=>{
-    t.active=false; await save(); renderAll();
-    notify(`"${t.name}" retirado`);
+function selectGender(gender,el){
+  newCatGender=gender;
+  document.querySelectorAll('.gender-opt').forEach(o=>o.className='gender-opt');
+  el.classList.add('sel-'+GENDER_CLASS[gender]);
+}
+async function addCategory(){
+  const err=document.getElementById('cat-err');
+  if(!newCatAge){err.textContent='Seleccioná la franja etaria';return;}
+  if(!newCatGender){err.textContent='Seleccioná el género';return;}
+  const key=catKey(newCatAge,newCatGender);
+  if(state.categories.find(c=>catKey(c.age,c.gender)===key)){
+    err.textContent='Esta categoría ya existe';return;
+  }
+  const cat={id:Date.now(),age:newCatAge,gender:newCatGender};
+  state.categories.push(cat);
+  newCatAge=null;newCatGender=null;
+  document.querySelectorAll('.age-opt').forEach(o=>o.classList.remove('sel'));
+  document.querySelectorAll('.gender-opt').forEach(o=>o.className='gender-opt');
+  err.textContent='';
+  await save();
+  renderCategories();renderAll();
+  notify(`Categoría ${cat.age} ${cat.gender} agregada ✓`);
+}
+async function removeCategory(id){
+  const cat=state.categories.find(c=>c.id===id);
+  const teamsInCat=state.teams.filter(t=>t.categoryId===id).length;
+  const matchesInCat=state.matches.filter(m=>m.categoryId===id).length;
+  let warn=`¿Eliminar la categoría <strong>${cat.age} ${cat.gender}</strong>?`;
+  if(teamsInCat||matchesInCat)warn+=`<br><br><span style="color:var(--danger);font-size:11px;">⚠ Se eliminarán ${teamsInCat} equipo(s) y ${matchesInCat} partido(s) de esta categoría.</span>`;
+  openConfirm('Eliminar Categoría',warn,async()=>{
+    state.categories=state.categories.filter(c=>c.id!==id);
+    state.teams=state.teams.filter(t=>t.categoryId!==id);
+    state.matches=state.matches.filter(m=>m.categoryId!==id);
+    await save();renderCategories();renderAll();
+    notify('Categoría eliminada');
   });
 }
+function renderCategories(){
+  const list=document.getElementById('cat-list'); if(!list)return;
+  if(!state.categories.length){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">🗂</div><div class="empty-msg">Sin categorías creadas</div><div class="empty-sub">Seleccioná edad y género arriba</div></div>`;
+    return;
+  }
+  list.innerHTML=state.categories.map(c=>{
+    const teams=state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
+    const matches=state.matches.filter(m=>m.categoryId===c.id).length;
+    const gc=GENDER_CLASS[c.gender];
+    return `
+      <div class="cat-item">
+        <div class="cat-item-icon" style="background:${GENDER_BG[c.gender]};color:${GENDER_COLOR[c.gender]};">
+          ${GENDER_ICON[c.gender]}${c.age}
+        </div>
+        <div class="cat-item-info">
+          <div class="cat-item-name">${c.age} — ${c.gender}</div>
+          <div class="cat-item-sub">${teams} equipo(s) · ${matches} partido(s)</div>
+        </div>
+        <span class="cat-pill cat-pill-${gc}">${c.gender}</span>
+        <button class="btn-remove" onclick="removeCategory(${c.id})" title="Eliminar">✕</button>
+      </div>`;
+  }).join('');
+}
 
-function renderTeams() {
-  const g=document.getElementById('teams-grid'); if(!g) return;
-  const all=[...state.teams.filter(t=>t.active),...state.teams.filter(t=>!t.active)];
-  if (!all.length){
-    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">??</div><div class="empty-msg">Sin equipos registrados</div><div class="empty-sub">Agrega el primero arriba</div></div>`;
+/* ── Category bar (tabs) ── */
+function renderCatBar(barId, section){
+  const bar=document.getElementById(barId); if(!bar)return;
+  if(!state.categories.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  // Set default if needed
+  if(!activeTab[section]||!state.categories.find(c=>c.id===activeTab[section])){
+    activeTab[section]=state.categories[0]?.id||null;
+  }
+  bar.innerHTML=state.categories.map(c=>{
+    const gc=GENDER_CLASS[c.gender];
+    const active=activeTab[section]===c.id;
+    return `<button class="cat-tab ${active?'active':''} ${active?gc:''}" onclick="switchCatTab('${section}',${c.id})">
+      ${GENDER_ICON[c.gender]} ${c.age} ${c.gender}
+    </button>`;
+  }).join('');
+}
+function switchCatTab(section,catId){
+  activeTab[section]=catId;
+  if(section==='teams'){renderCatBar('teams-cat-bar','teams');renderTeams();}
+  if(section==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();}
+  if(section==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
+}
+function currentCat(section){
+  return state.categories.find(c=>c.id===activeTab[section])||state.categories[0]||null;
+}
+
+/* ── Populate team category select ── */
+function renderTeamCatSelect(){
+  const sel=document.getElementById('inp-team-cat'); if(!sel)return;
+  sel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   TEAMS
+════════════════════════════════════════════ */
+async function addTeam(){
+  const catId=parseInt(document.getElementById('inp-team-cat').value);
+  const name=document.getElementById('inp-team-name').value.trim();
+  const abbr=document.getElementById('inp-team-abbr').value.trim().toUpperCase()||name.slice(0,3).toUpperCase();
+  if(!state.categories.length){notify('Primero creá una categoría',true);return;}
+  if(!name){notify('Ingresá el nombre del equipo',true);return;}
+  if(state.teams.find(t=>t.name.toLowerCase()===name.toLowerCase()&&t.categoryId===catId)){
+    notify('Ya existe ese equipo en esta categoría',true);return;
+  }
+  state.teams.push({id:Date.now(),name,abbr,categoryId:catId,active:true});
+  document.getElementById('inp-team-name').value='';
+  document.getElementById('inp-team-abbr').value='';
+  // Switch to this category tab
+  activeTab.teams=catId;
+  await save();
+  renderCatBar('teams-cat-bar','teams');
+  renderTeams();renderDashboard();
+  notify(`Equipo "${name}" agregado ✓`);
+}
+function removeTeam(id){
+  const t=state.teams.find(t=>t.id===id);
+  openConfirm('Retirar equipo',`¿Retirás al equipo <strong>${t.name}</strong>?`,async()=>{
+    t.active=false;await save();renderTeams();renderDashboard();notify(`"${t.name}" retirado`);
+  });
+}
+function renderTeams(){
+  const g=document.getElementById('teams-grid');
+  const titleEl=document.getElementById('teams-cat-title');
+  if(!g)return;
+  const cat=currentCat('teams');
+  if(!cat){
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🗂</div><div class="empty-msg">No hay categorías</div><div class="empty-sub">Creá una en la sección Categorías</div></div>`;
+    if(titleEl)titleEl.innerHTML='Equipos';
+    return;
+  }
+  if(titleEl)titleEl.innerHTML=`Equipos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  const all=[...state.teams.filter(t=>t.categoryId===cat.id&&t.active),...state.teams.filter(t=>t.categoryId===cat.id&&!t.active)];
+  if(!all.length){
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏐</div><div class="empty-msg">Sin equipos en esta categoría</div><div class="empty-sub">Agregá equipos usando el formulario arriba</div></div>`;
     return;
   }
   g.innerHTML=all.map(t=>`
@@ -820,106 +1065,129 @@ function renderTeams() {
       <div class="team-badge">${t.abbr}</div>
       <div class="team-info">
         <div class="team-name">${t.name}</div>
-        <div class="team-meta">${t.active?'? ACTIVO':'? RETIRADO'}</div>
+        <div class="team-meta">${t.active?'● ACTIVO':'✕ RETIRADO'}</div>
       </div>
-      ${t.active?`<button class="btn-remove" onclick="removeTeam(${t.id})">?</button>`:''}
+      ${t.active?`<button class="btn-remove" onclick="removeTeam(${t.id})">✕</button>`:''}
     </div>`).join('');
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    MATCHES
--------------------------------------------- */
-function renderMatchSelects() {
-  const active=state.teams.filter(t=>t.active);
+════════════════════════════════════════════ */
+function renderMatchSelects(){
+  // Category select
+  const catSel=document.getElementById('sel-match-cat'); if(!catSel)return;
+  catSel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
+  // Sync with active tab
+  const cat=currentCat('matches');
+  if(cat)catSel.value=cat.id;
+  fillTeamSelects(cat?.id);
+}
+function onMatchCatChange(){
+  const catId=parseInt(document.getElementById('sel-match-cat').value);
+  activeTab.matches=catId;
+  renderCatBar('matches-cat-bar','matches');
+  fillTeamSelects(catId);
+  renderMatches();
+}
+function fillTeamSelects(catId){
+  const active=catId?state.teams.filter(t=>t.categoryId===catId&&t.active):[];
   ['sel-team1','sel-team2'].forEach(sid=>{
-    const s=document.getElementById(sid); if(!s) return;
-    s.innerHTML='<option value=""> seleccionar </option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    const s=document.getElementById(sid);if(!s)return;
+    s.innerHTML='<option value="">— seleccionar —</option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
   });
 }
-
-async function createMatch(t1id,t2id,round) {
+async function createMatch(t1id,t2id,catId,round){
+  const cid=catId||parseInt(document.getElementById('sel-match-cat')?.value);
   const id1=t1id||parseInt(document.getElementById('sel-team1').value);
   const id2=t2id||parseInt(document.getElementById('sel-team2').value);
   const rnd=round||document.getElementById('inp-round').value.trim()||'Fase de grupos';
-  if (!id1||!id2){notify('Selecciona ambos equipos',true);return;}
-  if (id1===id2){notify('No puedes emparejar un equipo consigo mismo',true);return;}
-  const ex=state.matches.find(m=>m.status==='pending'&&((m.t1===id1&&m.t2===id2)||(m.t1===id2&&m.t2===id1)));
-  if (ex){notify('Ya existe ese partido pendiente',true);return;}
-  state.matches.push({id:state.matchCounter++,t1:id1,t2:id2,round:rnd,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null});
-  if (!t1id){
+  if(!cid){notify('Seleccioná una categoría',true);return;}
+  if(!id1||!id2){notify('Seleccioná ambos equipos',true);return;}
+  if(id1===id2){notify('No podés emparejar un equipo consigo mismo',true);return;}
+  // Validate same category
+  const t1=state.teams.find(t=>t.id===id1);
+  const t2=state.teams.find(t=>t.id===id2);
+  if(t1.categoryId!==cid||t2.categoryId!==cid){notify('Los equipos deben ser de la misma categoría',true);return;}
+  const ex=state.matches.find(m=>m.categoryId===cid&&m.status==='pending'&&((m.t1===id1&&m.t2===id2)||(m.t1===id2&&m.t2===id1)));
+  if(ex){notify('Ya existe ese partido pendiente',true);return;}
+  state.matches.push({id:state.matchCounter++,t1:id1,t2:id2,categoryId:cid,round:rnd,
+    sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null});
+  if(!t1id){
     document.getElementById('sel-team1').value='';
     document.getElementById('sel-team2').value='';
     document.getElementById('inp-round').value='';
   }
-  await save(); renderAll(); renderMatchSelects();
-  notify('Partido creado ?');
+  await save();renderMatches();renderDashboard();
+  notify('Partido creado ✓');
 }
-
-async function autoMatch() {
-  const active=state.teams.filter(t=>t.active);
-  if (active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
+async function autoMatch(){
+  const cat=currentCat('matches');
+  if(!cat){notify('Seleccioná una categoría',true);return;}
+  const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
+  if(active.length<2){notify('Se necesitan al menos 2 equipos en esta categoría',true);return;}
   const sh=[...active].sort(()=>Math.random()-.5);
   let created=0;
-  for (let i=0;i<sh.length-1;i+=2){
+  for(let i=0;i<sh.length-1;i+=2){
     const t1=sh[i].id,t2=sh[i+1].id;
-    const ex=state.matches.find(m=>m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
-    if (!ex){await createMatch(t1,t2,'Auto - Ronda '+(Math.floor(state.matchCounter/2)+1));created++;}
+    const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
+    if(!ex){await createMatch(t1,t2,cat.id,'Auto - Ronda '+(Math.floor(state.matchCounter/2)+1));created++;}
   }
-  if (!created) notify('No se generaron nuevos partidos',true);
-  else notify(`${created} partido(s) generado(s) ?`);
+  if(!created)notify('No se generaron nuevos partidos',true);
+  else notify(`${created} partido(s) generado(s) ✓`);
 }
-
-async function addSet(mid) {
+async function addSet(mid){
   const m=state.matches.find(m=>m.id===mid);
-  if (!m||m.sets.length>=4){notify('Maximo 3 sets por partido',true);return;}
-  m.sets.push({s1:'',s2:''});
-  await save(); renderMatches();
+  if(!m||m.sets.length>=4){notify('Máximo 4 sets',true);return;}
+  m.sets.push({s1:'',s2:''});await save();renderMatches();
 }
-
-async function removeSet(mid,idx) {
+async function removeSet(mid,idx){
   const m=state.matches.find(m=>m.id===mid);
-  if (!m||m.sets.length<=2){notify('M�nimo 2 sets por partido',true);return;}
-  m.sets.splice(idx,1);
-  await save(); renderMatches();
+  if(!m||m.sets.length<=2){notify('Mínimo 2 sets',true);return;}
+  m.sets.splice(idx,1);await save();renderMatches();
 }
-
-async function updateScore(mid,si,side,val) {
-  const m=state.matches.find(m=>m.id===mid); if(!m) return;
-  m.sets[si][side]=val===''?'':parseInt(val)||0;
-  await save();
+async function updateScore(mid,si,side,val){
+  const m=state.matches.find(m=>m.id===mid);if(!m)return;
+  m.sets[si][side]=val===''?'':parseInt(val)||0;await save();
 }
-
-async function saveMatch(mid) {
-  const m=state.matches.find(m=>m.id===mid); if(!m) return;
+async function saveMatch(mid){
+  const m=state.matches.find(m=>m.id===mid);if(!m)return;
   let w1=0,w2=0;
   m.sets.forEach(s=>{
     const v1=(s.s1===''||s.s1===null)?0:parseInt(s.s1)||0;
     const v2=(s.s2===''||s.s2===null)?0:parseInt(s.s2)||0;
-    s.s1=v1; s.s2=v2;
-    if(v1>v2) w1++; else if(v2>v1) w2++;
+    s.s1=v1;s.s2=v2;
+    if(v1>v2)w1++;else if(v2>v1)w2++;
   });
-  if(w1===0&&w2===0){notify('Ingresa al menos un set con ganador',true);return;}
+  if(w1===0&&w2===0){notify('Ingresá al menos un set con ganador',true);return;}
   if(Math.abs(w1-w2)!==2){notify(`Resultado inválido (${w1}-${w2}). El ganador debe superar por exactamente 2 sets`,true);return;}
-  m.winner=w1>w2?m.t1:m.t2; m.status='done';
-  await save(); renderAll();
+  m.winner=w1>w2?m.t1:m.t2;m.status='done';
+  await save();renderMatches();renderDashboard();renderStandings();
   const winner=state.teams.find(t=>t.id===m.winner);
-  notify(`Guardado  Ganador: ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ?`);
+  notify(`Guardado — ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ✓`);
 }
-
-async function deleteMatch(mid) {
+async function deleteMatch(mid){
   openConfirm('Eliminar partido','¿Eliminar este partido?',async()=>{
     state.matches=state.matches.filter(m=>m.id!==mid);
-    await save(); renderAll(); notify('Partido eliminado');
+    await save();renderMatches();renderDashboard();notify('Partido eliminado');
   });
 }
-
-function renderMatches() {
-  const el=document.getElementById('matches-list'); if(!el) return;
-  if(!state.matches.length){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">?</div><div class="empty-msg">Sin partidos creados</div><div class="empty-sub">Cre� un emparejamiento arriba</div></div>`;
+function renderMatches(){
+  const el=document.getElementById('matches-list');
+  const titleEl=document.getElementById('matches-cat-title');
+  if(!el)return;
+  const cat=currentCat('matches');
+  if(!cat){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">🗂</div><div class="empty-msg">No hay categorías</div></div>`;
     return;
   }
-  el.innerHTML=state.matches.map(m=>{
+  if(titleEl)titleEl.innerHTML=`Partidos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  const catMatches=state.matches.filter(m=>m.categoryId===cat.id);
+  if(!catMatches.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-msg">Sin partidos en esta categoría</div><div class="empty-sub">Creá un emparejamiento arriba</div></div>`;
+    return;
+  }
+  el.innerHTML=catMatches.map(m=>{
     const t1=state.teams.find(t=>t.id===m.t1);
     const t2=state.teams.find(t=>t.id===m.t2);
     const done=m.status==='done';
@@ -933,7 +1201,7 @@ function renderMatches() {
           <span class="score-sep">:</span>
           <input class="score-inp" type="number" min="0" max="99" value="${s.s2}" placeholder="0"
             onchange="updateScore(${m.id},${i},'s2',this.value)" ${done?'disabled':''}>
-          ${!done&&m.sets.length>2?`<button class="rem-set-btn" onclick="removeSet(${m.id},${i})">-</button>`:''}
+          ${!done&&m.sets.length>2?`<button class="rem-set-btn" onclick="removeSet(${m.id},${i})">−</button>`:''}
         </div>
       </div>`).join('');
     return `
@@ -948,26 +1216,26 @@ function renderMatches() {
           </div>
           <div class="match-sets">
             ${sh}
-            ${!done&&m.sets.length<4?`<button class="add-set-btn" onclick="addSet(${m.id})">+</button>`:''}
+            ${!done&&m.sets.length<4?`<button class="add-set-btn" onclick="addSet(${m.id})">＋</button>`:''}
           </div>
         </div>
         <div class="match-actions">
-          <span class="match-status ${done?'status-done':'status-pending'}">${done?'? Finalizado':'Pendiente'}</span>
-          ${!done?`<button class="btn btn-success" style="font-size:11px;padding:6px 11px;" onclick="saveMatch(${m.id})">Guardar resultado</button>`:''}
-          <button class="btn btn-danger" style="font-size:11px;padding:5px 9px;" onclick="deleteMatch(${m.id})">Eliminar</button>
+          <span class="match-status ${done?'status-done':'status-pending'}">${done?'✓ Fin':'Pendiente'}</span>
+          ${!done?`<button class="btn btn-success btn-sm" onclick="saveMatch(${m.id})">Guardar</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="deleteMatch(${m.id})">Eliminar</button>
         </div>
       </div>`;
   }).join('');
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    STANDINGS
--------------------------------------------- */
-function calcStandings() {
+════════════════════════════════════════════ */
+function calcStandingsForCat(catId){
   const s={};
-  state.teams.forEach(t=>{s[t.id]={team:t,pj:0,g:0,p:0,sg:0,sp:0,pts:0};});
-  state.matches.filter(m=>m.status==='done').forEach(m=>{
-    if(!s[m.t1]||!s[m.t2]) return;
+  state.teams.filter(t=>t.categoryId===catId).forEach(t=>{s[t.id]={team:t,pj:0,g:0,p:0,sg:0,sp:0,pts:0};});
+  state.matches.filter(m=>m.categoryId===catId&&m.status==='done').forEach(m=>{
+    if(!s[m.t1]||!s[m.t2])return;
     let sg1=0,sg2=0;
     m.sets.forEach(x=>{if(x.s1!==''&&x.s2!==''){if(x.s1>x.s2)sg1++;else if(x.s2>x.s1)sg2++;}});
     s[m.t1].pj++;s[m.t2].pj++;
@@ -978,19 +1246,26 @@ function calcStandings() {
   });
   return Object.values(s).sort((a,b)=>b.pts-a.pts||(b.sg-b.sp)-(a.sg-a.sp));
 }
-
-function renderStandings() {
-  const body=document.getElementById('standings-body'); if(!body) return;
-  const rows=calcStandings();
+function renderStandings(){
+  const body=document.getElementById('standings-body');
+  const titleEl=document.getElementById('standings-cat-title');
+  if(!body)return;
+  const cat=currentCat('standings');
+  if(!cat){
+    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">No hay categorías</td></tr>`;
+    return;
+  }
+  if(titleEl)titleEl.innerHTML=`Posiciones — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  const rows=calcStandingsForCat(cat.id);
   if(!rows.length||!rows.some(r=>r.pj>0)){
-    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:34px;color:var(--text-muted);">Sin datos a�n</td></tr>`;
+    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">Sin datos en esta categoría</td></tr>`;
     return;
   }
   body.innerHTML=rows.map((r,i)=>{
     const p=i+1,cls=p===1?'pos-1':p===2?'pos-2':p===3?'pos-3':'pos-n';
     return `<tr>
       <td><div class="pos-badge ${cls}">${p}</div></td>
-      <td><strong>${r.team.name}</strong> <span style="color:var(--text-muted);font-size:10px;">${r.team.abbr}</span></td>
+      <td><strong>${r.team.name}</strong> <span style="color:var(--text-muted);font-size:9px;">${r.team.abbr}</span></td>
       <td>${r.pj}</td>
       <td><span class="stat-pill stat-w">${r.g}</span></td>
       <td><span class="stat-pill stat-l">${r.p}</span></td>
@@ -1000,85 +1275,130 @@ function renderStandings() {
   }).join('');
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    DASHBOARD
--------------------------------------------- */
-function renderDashboard() {
-  const sr=document.getElementById('stats-row'); if(!sr) return;
-  const active=state.teams.filter(t=>t.active).length;
+════════════════════════════════════════════ */
+function renderDashboard(){
+  const sr=document.getElementById('stats-row');if(!sr)return;
+  const totalTeams=state.teams.filter(t=>t.active).length;
   const total=state.matches.length,done=state.matches.filter(m=>m.status==='done').length;
+  const cats=state.categories.length;
   sr.innerHTML=`
-    <div class="stat-card"><div class="stat-val">${active}</div><div class="stat-lbl">Equipos Activos</div></div>
-    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">Partidos</div></div>
+    <div class="stat-card"><div class="stat-val">${cats}</div><div class="stat-lbl">Categorías</div></div>
+    <div class="stat-card"><div class="stat-val">${totalTeams}</div><div class="stat-lbl">Equipos</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--win)">${done}</div><div class="stat-lbl">Finalizados</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${total-done}</div><div class="stat-lbl">Pendientes</div></div>`;
 
+  // Category overview
+  const catOv=document.getElementById('dash-cats');
+  if(!state.categories.length){
+    catOv.innerHTML=`<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías. Ir a la sección <strong>Categorías</strong> para agregar.</div>`;
+  }else{
+    catOv.innerHTML=state.categories.map(c=>{
+      const teams=state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
+      const cdone=state.matches.filter(m=>m.categoryId===c.id&&m.status==='done').length;
+      const ctotal=state.matches.filter(m=>m.categoryId===c.id).length;
+      const leader=calcStandingsForCat(c.id).filter(r=>r.pj>0)[0];
+      return `<div class="cat-overview-card" onclick="goToCatSection('standings',${c.id})">
+        <div class="co-name" style="color:${GENDER_COLOR[c.gender]}">${GENDER_ICON[c.gender]} ${c.age} ${c.gender}</div>
+        <div class="co-stats">
+          <span>👥 ${teams}</span>
+          <span>📋 ${cdone}/${ctotal}</span>
+          ${leader?`<span>🥇 ${leader.team.name}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Recent results
   const rec=document.getElementById('dash-recent');
   const dm=state.matches.filter(m=>m.status==='done').slice(-5).reverse();
-  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin resultados aun</div>':
+  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin resultados aún</div>':
     dm.map(m=>{
       const w=state.teams.find(t=>t.id===m.winner);
       const l=state.teams.find(t=>t.id===(m.winner===m.t1?m.t2:m.t1));
+      const cat=state.categories.find(c=>c.id===m.categoryId);
       const sc=m.sets.filter(s=>s.s1!==''&&s.s2!=='').map(s=>`${s.s1}-${s.s2}`).join(' | ');
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div><span style="color:var(--win);font-weight:600;">${w?w.name:'?'}</span> <span style="color:var(--text-muted);font-size:12px;">vs ${l?l.name:'?'}</span></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">${sc}</div>
+      return `<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div>
+          ${cat?`<span class="cat-pill cat-pill-${GENDER_CLASS[cat.gender]}" style="margin-bottom:2px;">${cat.age}</span> `:''}
+          <span style="color:var(--win);font-weight:600;">${w?w.name:'?'}</span>
+          <span style="color:var(--text-muted);font-size:11px;"> vs ${l?l.name:'?'}</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);flex-shrink:0;">${sc}</div>
       </div>`;
     }).join('');
 
+  // Leaders per category
   const ld=document.getElementById('dash-leaders');
-  const st=calcStandings().filter(r=>r.pj>0).slice(0,5);
-  ld.innerHTML=!st.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin clasificacion aun</div>':
-    st.map((r,i)=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div class="pos-badge ${i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n'}">${i+1}</div>
-        <div style="flex:1;font-weight:600;">${r.team.name}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);">${r.pts} pts</div>
+  if(!state.categories.length){ld.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías aún</div>';return;}
+  ld.innerHTML=state.categories.map(c=>{
+    const top=calcStandingsForCat(c.id).filter(r=>r.pj>0).slice(0,3);
+    if(!top.length)return `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);">${GENDER_ICON[c.gender]} ${c.age} ${c.gender} — sin datos</div>`;
+    return top.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <div class="pos-badge ${i===0?'pos-1':i===1?'pos-2':'pos-3'}">${i+1}</div>
+        <span class="cat-pill cat-pill-${GENDER_CLASS[c.gender]}">${c.age}</span>
+        <div style="flex:1;font-size:12px;font-weight:600;">${r.team.name}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);">${r.pts}pts</div>
       </div>`).join('');
+  }).join('');
 }
 
-/* --------------------------------------------
+function goToCatSection(section, catId){
+  activeTab[section]=catId;
+  showPage(section,null);
+  // Activate correct nav button
+  const navBtns=document.querySelectorAll('.nav-btn');
+  navBtns.forEach(b=>b.classList.remove('active'));
+  const map={teams:2,matches:3,standings:4};
+  if(map[section]!==undefined)navBtns[map[section]]?.classList.add('active');
+}
+
+/* ════════════════════════════════════════════
    PROFILE
--------------------------------------------- */
-async function renderProfile() {
+════════════════════════════════════════════ */
+async function renderProfile(){
   const name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'?';
   document.getElementById('profile-avatar').textContent=name.slice(0,2).toUpperCase();
   document.getElementById('profile-name').textContent=name;
-  document.getElementById('profile-email').textContent=currentUser?.email||'�';
-  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'�';
+  document.getElementById('profile-email').textContent=currentUser?.email||'—';
+  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'—';
   document.getElementById('profile-since').textContent='Miembro desde '+since;
-
   let list=[];
-  if (isConfigured()) {
-    const {data}=await db.from('tournaments').select('data').eq('user_id',currentUser.id);
-    list=data||[];
-  } else {
-    const raw=localStorage.getItem(getTournamentsKey());
-    list=raw?JSON.parse(raw):[];
-  }
-  let nt=list.length,nteams=0,nmatches=0;
-  list.forEach(t=>{nteams+=(t.data?.teams?.filter(x=>x.active).length||0);nmatches+=(t.data?.matches?.filter(x=>x.status==='done').length||0);});
+  if(isConfigured()){const{data}=await db.from('tournaments').select('data').eq('user_id',currentUser.id);list=data||[];}
+  else{const raw=localStorage.getItem(getTKey());list=raw?JSON.parse(raw):[];}
+  let nt=list.length,nteams=0,nmatches=0,ncats=0;
+  list.forEach(t=>{
+    nteams+=(t.data?.teams?.filter(x=>x.active).length||0);
+    nmatches+=(t.data?.matches?.filter(x=>x.status==='done').length||0);
+    ncats+=(t.data?.categories?.length||0);
+  });
   document.getElementById('profile-stats').innerHTML=`
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      ${[['Torneos creados',nt],['Equipos registrados',nteams],['Partidos jugados',nmatches]].map(([lbl,val])=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);">
-          <span style="color:var(--text-muted);">${lbl}</span>
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);">${val}</span>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${[['Torneos',nt],['Categorías',ncats],['Equipos',nteams],['Partidos jugados',nmatches]].map(([l,v])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--text-muted);font-size:13px;">${l}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);">${v}</span>
         </div>`).join('')}
     </div>`;
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    RENDER ALL
--------------------------------------------- */
-function renderAll() {
-  if (!currentTournament) return;
-  renderTeams(); renderMatches(); renderStandings(); renderDashboard();
+════════════════════════════════════════════ */
+function renderAll(){
+  if(!currentTournament)return;
+  renderDashboard();
+  renderCategories();
+  renderCatBar('teams-cat-bar','teams');renderTeams();renderTeamCatSelect();
+  renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();
+  renderCatBar('standings-cat-bar','standings');renderStandings();
 }
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    MODALS
--------------------------------------------- */
+════════════════════════════════════════════ */
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function openConfirm(title,body,cb){
@@ -1091,23 +1411,18 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
 });
 
-/* --------------------------------------------
+/* ════════════════════════════════════════════
    NOTIFICATION
--------------------------------------------- */
+════════════════════════════════════════════ */
 let _nt;
 function notify(msg,isErr=false){
   const el=document.getElementById('notif');
-  el.textContent=msg; el.className='show'+(isErr?' danger':'');
-  clearTimeout(_nt); _nt=setTimeout(()=>el.classList.remove('show'),3200);
+  el.textContent=msg;el.className='show'+(isErr?' danger':'');
+  clearTimeout(_nt);_nt=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-/* --------------------------------------------
-   AUTH STATE (Supabase)
--------------------------------------------- */
-if (isConfigured()) {
-  db.auth.onAuthStateChange((event)=>{
-    if (event==='SIGNED_OUT') { currentUser=null; currentTournament=null; }
-  });
+if(isConfigured()){
+  db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentTournament=null;}});
 }
 
 boot();
