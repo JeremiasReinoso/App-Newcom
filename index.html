@@ -1,0 +1,1118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEWCOM — Sistema de Torneos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg:#080c14;--surface:#0f1520;--surface2:#161e2e;--border:#1e2d45;
+    --accent:#00d4ff;--accent2:#ff6b35;--accent3:#7fff6b;
+    --text:#e8f0fe;--text-muted:#5a7a9a;--danger:#ff3860;--win:#00e676;--lose:#ff3860;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+  /* SCREENS */
+  .screen{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#020509;}
+  .screen.hidden{display:none;}
+  .screen-bg{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 60% 40% at 20% 50%,rgba(0,212,255,.06) 0%,transparent 70%),
+               radial-gradient(ellipse 40% 60% at 80% 30%,rgba(255,107,53,.05) 0%,transparent 70%);}
+  .screen-grid{position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+    background-size:60px 60px;}
+  .box{position:relative;background:#0a1220;border:1px solid var(--border);border-top:2px solid var(--accent);
+    padding:46px 50px;width:min(520px,95vw);animation:box-in .5s ease;}
+  @keyframes box-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  .box-logo{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:6px;color:var(--accent);
+    text-shadow:0 0 40px rgba(0,212,255,.4);line-height:1;margin-bottom:4px;}
+  .box-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:30px;}
+  .box-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+
+  /* FORM ELEMENTS */
+  .fi{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+  .fi label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+  .fi input{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
+    color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+  .fi input:focus{border-color:var(--accent);}
+  .err-msg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--danger);min-height:16px;margin-bottom:10px;}
+
+  /* BUTTONS */
+  .btn-full{width:100%;background:var(--accent);color:#020509;border:none;padding:14px;
+    font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:4px;cursor:pointer;transition:all .2s;}
+  .btn-full:hover{background:#00eeff;box-shadow:0 0 26px rgba(0,212,255,.4);}
+  .btn-full:disabled{opacity:.3;cursor:not-allowed;}
+  .btn-full.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:15px;letter-spacing:2px;}
+  .btn-full.secondary:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+  .btn-full.danger-btn{background:var(--danger);color:#fff;font-size:15px;letter-spacing:2px;}
+
+  /* LICENSE */
+  .lic-text{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:15px 17px;
+    font-size:11.5px;line-height:1.8;color:#7a9ab8;max-height:155px;overflow-y:auto;margin-bottom:18px;
+    font-family:'JetBrains Mono',monospace;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+  .lic-check{display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;user-select:none;}
+  .lic-check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+  .lic-check label{font-size:13px;cursor:pointer;}
+  .lic-key-inp{background:#060e18;border:1px solid var(--border);border-radius:2px;padding:11px 13px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:3px;
+    outline:none;transition:border-color .2s;width:100%;margin-bottom:4px;}
+  .lic-key-inp:focus{border-color:var(--accent);}
+  .box-version{margin-top:20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#2a3a50;letter-spacing:2px;}
+
+  /* AUTH TABS */
+  .auth-tabs{display:flex;margin-bottom:26px;border-bottom:1px solid var(--border);}
+  .auth-tab{flex:1;padding:11px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;
+    letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);
+    border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+  .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  /* LOADING */
+  #loading-screen{z-index:9999;}
+  .spinner{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--accent);
+    border-radius:50%;animation:spin .8s linear infinite;margin-bottom:18px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--text-muted);}
+
+  /* APP */
+  #app{display:none;min-height:100vh;}
+  #app.visible{display:block;animation:app-in .5s ease;}
+  @keyframes app-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+
+  /* HEADER */
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;
+    display:flex;align-items:center;gap:10px;height:62px;position:sticky;top:0;z-index:100;}
+  .hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px;color:var(--accent);
+    text-shadow:0 0 18px rgba(0,212,255,.3);flex-shrink:0;}
+  .hdr-logo span{color:var(--accent2);}
+  .hdr-tournament{flex:1;display:flex;align-items:center;gap:10px;overflow:hidden;
+    border-left:1px solid var(--border);padding-left:14px;margin-left:2px;}
+  .hdr-tname-wrap{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;
+    color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hdr-tname-wrap strong{color:var(--text);font-size:13px;display:block;}
+  .hdr-nav{display:flex;gap:2px;flex-shrink:0;}
+  .nav-btn{background:none;border:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;
+    font-size:12px;font-weight:500;letter-spacing:1px;padding:6px 13px;cursor:pointer;border-radius:3px;
+    transition:all .2s;text-transform:uppercase;white-space:nowrap;}
+  .nav-btn:hover{color:var(--text);background:var(--surface2);}
+  .nav-btn.active{color:var(--accent);background:rgba(0,212,255,.08);border-bottom:2px solid var(--accent);}
+  .hdr-user{display:flex;align-items:center;gap:8px;flex-shrink:0;
+    border-left:1px solid var(--border);padding-left:12px;margin-left:2px;}
+  .hdr-avatar{width:32px;height:32px;border-radius:50%;background:rgba(0,212,255,.1);
+    border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--accent);cursor:pointer;flex-shrink:0;}
+  .hdr-uname{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .btn-logout{background:none;border:1px solid var(--border);color:var(--text-muted);
+    font-size:11px;padding:5px 9px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* PAGES */
+  .page{display:none;padding:34px 26px;max-width:1280px;margin:0 auto;}
+  .page.active{display:block;animation:pg-in .3s ease;}
+  @keyframes pg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .page-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;margin-bottom:4px;}
+  .page-title span{color:var(--accent);}
+  .page-desc{color:var(--text-muted);font-size:13px;margin-bottom:26px;font-family:'JetBrains Mono',monospace;}
+
+  /* CARDS */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:22px;margin-bottom:18px;}
+  .card-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;color:var(--accent);
+    margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-title::before{content:'';width:3px;height:17px;background:var(--accent);display:inline-block;}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:13px;margin-bottom:26px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--accent);line-height:1;margin-bottom:4px;}
+  .stat-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+
+  /* TOURNAMENTS */
+  .tournaments-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:15px;}
+  .tournament-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+    padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+  .tournament-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:var(--accent);transform:scaleX(0);transition:transform .2s;}
+  .tournament-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .tournament-card:hover::before{transform:scaleX(1);}
+  .tc-name{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;margin-bottom:6px;}
+  .tc-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;}
+  .tc-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);margin-top:10px;}
+  .tc-del{position:absolute;top:10px;right:10px;background:none;border:1px solid transparent;
+    color:var(--text-muted);width:24px;height:24px;border-radius:3px;cursor:pointer;font-size:12px;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .tc-del:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
+  .new-tc{background:rgba(0,212,255,.03);border:1px dashed var(--border);border-radius:4px;padding:20px;
+    cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:8px;min-height:105px;}
+  .new-tc:hover{border-color:var(--accent);background:rgba(0,212,255,.07);}
+  .new-tc-icon{font-size:26px;}
+  .new-tc-lbl{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;color:var(--accent);}
+
+  /* TEAMS */
+  .teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px;}
+  .team-card{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+    padding:16px;display:flex;align-items:center;transition:all .2s;position:relative;overflow:hidden;}
+  .team-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+  .team-card:hover{border-color:var(--accent);transform:translateX(3px);}
+  .team-card.eliminated{opacity:.4;filter:grayscale(.8);}
+  .team-card.eliminated::before{background:var(--danger);}
+  .team-badge{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);
+    width:38px;height:38px;background:rgba(0,212,255,.08);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:11px;}
+  .team-info{flex:1;min-width:0;}
+  .team-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .team-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);}
+  .btn-remove{background:none;border:1px solid transparent;color:var(--text-muted);
+    width:26px;height:26px;cursor:pointer;border-radius:3px;font-size:13px;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+  .btn-remove:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,56,96,.1);}
+
+  /* FORM */
+  .form-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;}
+  .form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px;}
+  .form-group label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+  .form-group input,.form-group select{background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+    padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+  .form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+  .form-group select option{background:var(--surface2);}
+  .btn{padding:9px 18px;border:none;border-radius:3px;cursor:pointer;font-family:'DM Sans',sans-serif;
+    font-size:13px;font-weight:600;letter-spacing:.5px;transition:all .2s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+  .btn-primary{background:var(--accent);color:#020509;}
+  .btn-primary:hover{background:#00eeff;box-shadow:0 0 16px rgba(0,212,255,.3);}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+  .btn-danger:hover{background:var(--danger);color:#fff;}
+  .btn-success{background:var(--win);color:#020509;}
+  .btn-accent2{background:var(--accent2);color:#fff;}
+  .btn-accent2:hover{filter:brightness(1.1);}
+
+  /* MATCHES */
+  .matches-list{display:flex;flex-direction:column;gap:13px;}
+  .match-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+    padding:16px 18px;display:flex;align-items:flex-start;gap:13px;flex-wrap:wrap;}
+  .match-card.completed{border-left:3px solid var(--accent3);}
+  .match-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);width:22px;text-align:center;flex-shrink:0;padding-top:4px;}
+  .match-body{flex:1;min-width:200px;}
+  .round-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent2);background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);
+    padding:2px 8px;border-radius:20px;margin-bottom:9px;display:inline-block;}
+  .match-teams{display:flex;align-items:center;gap:9px;}
+  .match-team{font-weight:600;font-size:13px;flex:1;text-align:center;}
+  .match-team.winner{color:var(--win);}
+  .match-team.loser{color:var(--text-muted);text-decoration:line-through;}
+  .match-vs{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--text-muted);flex-shrink:0;}
+  .match-sets{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;}
+  .set-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .set-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;}
+  .set-scores{display:flex;gap:3px;align-items:center;}
+  .score-inp{width:38px;background:var(--bg);border:1px solid var(--border);border-radius:3px;
+    padding:5px 4px;text-align:center;color:var(--text);font-family:'JetBrains Mono',monospace;
+    font-size:13px;font-weight:600;outline:none;transition:border-color .2s;}
+  .score-inp:focus{border-color:var(--accent);}
+  .score-sep{color:var(--text-muted);font-size:11px;}
+  .rem-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
+    width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:11px;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .rem-set-btn:hover{border-color:var(--danger);color:var(--danger);}
+  .add-set-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);
+    width:24px;height:24px;border-radius:3px;cursor:pointer;font-size:15px;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+  .add-set-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .match-actions{flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  .match-status{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
+  .status-pending{background:rgba(90,122,154,.15);color:var(--text-muted);}
+  .status-done{background:rgba(127,255,107,.12);color:var(--accent3);}
+
+  /* STANDINGS */
+  .standings-table{width:100%;border-collapse:collapse;}
+  .standings-table th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--text-muted);padding:8px 11px;text-align:left;border-bottom:1px solid var(--border);}
+  .standings-table td{padding:11px 11px;border-bottom:1px solid rgba(30,45,69,.5);font-size:13px;}
+  .standings-table tr:last-child td{border-bottom:none;}
+  .standings-table tr:hover td{background:rgba(0,212,255,.03);}
+  .pos-badge{font-family:'Bebas Neue',sans-serif;font-size:15px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .pos-1{background:rgba(255,215,0,.15);color:#ffd700}
+  .pos-2{background:rgba(192,192,192,.15);color:#c0c0c0}
+  .pos-3{background:rgba(205,127,50,.15);color:#cd7f32}
+  .pos-n{background:rgba(30,45,69,.5);color:var(--text-muted)}
+  .stat-pill{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;display:inline-block;}
+  .stat-w{background:rgba(0,230,118,.12);color:var(--win)}
+  .stat-l{background:rgba(255,56,96,.12);color:var(--lose)}
+  .stat-s{background:rgba(0,212,255,.1);color:var(--accent)}
+
+  /* PROFILE */
+  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .profile-avatar-big{width:72px;height:72px;border-radius:50%;background:rgba(0,212,255,.1);
+    border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);margin-bottom:14px;}
+
+  /* EMPTY */
+  .empty-state{text-align:center;padding:46px 20px;color:var(--text-muted);}
+  .empty-icon{font-size:42px;margin-bottom:12px;opacity:.5;}
+  .empty-msg{font-size:14px;margin-bottom:5px;}
+  .empty-sub{font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,5,9,.85);z-index:500;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;animation:ov-in .2s ease;}
+  @keyframes ov-in{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);
+    padding:30px;width:min(450px,95vw);animation:md-in .22s ease;}
+  @keyframes md-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;}
+  .modal .fi input{background:#060e18;}
+  .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+  /* NOTIF */
+  #notif{position:fixed;top:72px;right:20px;background:var(--surface);border:1px solid var(--accent);
+    border-left:3px solid var(--accent);padding:11px 17px;border-radius:3px;font-size:13px;z-index:9000;
+    transform:translateX(120%);transition:transform .3s ease;max-width:290px;}
+  #notif.show{transform:translateX(0);}
+  #notif.danger{border-color:var(--danger);}
+
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  @media(max-width:700px){
+    header{padding:0 12px;height:auto;padding-top:10px;padding-bottom:10px;flex-wrap:wrap;gap:7px;}
+    .hdr-tournament{display:none;}
+    .page{padding:18px 13px;}
+    .box{padding:28px 20px;}
+    .profile-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen" id="loading-screen">
+  <div class="screen-bg"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="spinner"></div>
+    <div class="loading-text">CARGANDO...</div>
+  </div>
+</div>
+
+<!-- LICENSE -->
+<div class="screen hidden" id="license-screen">
+  <div class="screen-bg"></div><div class="screen-grid"></div>
+  <div class="box">
+    <div class="box-logo">NEWCOM</div>
+    <div class="box-sub">Tournament Management System v2.1</div>
+    <div class="box-title">// Acuerdo de licencia de uso</div>
+    <div class="lic-text">
+LICENCIA DE USO — NEWCOM TOURNAMENT MANAGEMENT SYSTEM
+Versión 2.1 | © 2025 Newcom Technologies
+
+Este software es propiedad exclusiva de Newcom Technologies. Al activar esta licencia, el usuario acepta los siguientes términos:
+
+1. OTORGAMIENTO DE LICENCIA. Newcom Technologies otorga al Licenciatario una licencia no exclusiva, intransferible y revocable para utilizar este software únicamente para la organización y gestión de torneos deportivos en el marco de actividades autorizadas.
+
+2. RESTRICCIONES. Queda expresamente prohibido: (a) copiar, modificar, distribuir, vender o sublicenciar el software; (b) realizar ingeniería inversa o descompilar el código fuente; (c) utilizar el software para fines comerciales sin autorización escrita de Newcom Technologies; (d) remover o alterar avisos de propiedad intelectual.
+
+3. PROPIEDAD INTELECTUAL. El software, incluyendo su diseño, estructura, código y documentación, es propiedad exclusiva de Newcom Technologies y está protegido por las leyes de propiedad intelectual vigentes.
+
+4. DATOS. El Licenciatario es responsable de la exactitud de los datos ingresados. Newcom Technologies no asume responsabilidad por pérdida de datos derivada del uso del software.
+
+5. LIMITACIÓN DE RESPONSABILIDAD. En ningún caso Newcom Technologies será responsable por daños indirectos, incidentales o consecuentes derivados del uso o imposibilidad de uso del software.
+
+6. VIGENCIA. Esta licencia es válida mientras el usuario cumpla los términos aquí establecidos. Newcom Technologies se reserva el derecho de revocar la licencia ante cualquier incumplimiento.
+    </div>
+    <div class="lic-check">
+      <input type="checkbox" id="lic-check">
+      <label for="lic-check">He leído y acepto los términos del acuerdo de licencia</label>
+    </div>
+    <div class="box-title">// Clave de activación</div>
+    <input type="text" class="lic-key-inp" id="lic-key" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19">
+    <div class="err-msg" id="lic-err"></div>
+    <button class="btn-full" onclick="activateLicense()">ACTIVAR SISTEMA</button>
+    <div class="box-version">NEWCOM TMS • BUILD 2025.1 • ALL RIGHTS RESERVED</div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="screen hidden" id="auth-screen">
+  <div class="screen-bg"></div><div class="screen-grid"></div>
+  <div class="box">
+    <div class="box-logo">NEWCOM</div>
+    <div class="box-sub">Tournament Management System</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Registrarse</button>
+    </div>
+    <div id="form-login">
+      <div class="fi"><label>Email</label><input type="email" id="login-email" placeholder="usuario@ejemplo.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fi"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="err-msg" id="login-err"></div>
+      <button class="btn-full" id="btn-login" onclick="doLogin()">INGRESAR</button>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="fi"><label>Nombre</label><input type="text" id="reg-name" placeholder="Tu nombre"></div>
+      <div class="fi"><label>Email</label><input type="email" id="reg-email" placeholder="usuario@ejemplo.com"></div>
+      <div class="fi"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
+      <div class="err-msg" id="reg-err"></div>
+      <button class="btn-full" id="btn-register" onclick="doRegister()">CREAR CUENTA</button>
+    </div>
+    <div class="box-version" style="margin-top:18px;">Licencia activada ?</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="hdr-logo">NEW<span>COM</span></div>
+    <div class="hdr-tournament" id="hdr-tournament" style="display:none">
+      <div class="hdr-tname-wrap"><span>Torneo activo</span><strong id="hdr-tname">—</strong></div>
+      <button class="btn btn-secondary" style="font-size:11px;padding:5px 9px;" onclick="goToTournaments()">? Torneos</button>
+    </div>
+    <nav class="hdr-nav" id="hdr-nav" style="display:none">
+      <button class="nav-btn active" onclick="showPage('dashboard',event)">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('teams',event)">Equipos</button>
+      <button class="nav-btn" onclick="showPage('matches',event)">Partidos</button>
+      <button class="nav-btn" onclick="showPage('standings',event)">Posiciones</button>
+    </nav>
+    <div class="hdr-user">
+      <div class="hdr-uname" id="hdr-uname"></div>
+      <div class="hdr-avatar" id="hdr-avatar" onclick="showPage('profile',event)" title="Mi perfil">?</div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <!-- TOURNAMENTS PAGE -->
+  <div class="page active" id="page-tournaments">
+    <div class="page-title">MIS <span>TORNEOS</span></div>
+    <div class="page-desc">// Seleccioná un torneo o creá uno nuevo</div>
+    <div class="tournaments-grid" id="tournaments-grid"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div class="page-title">PANEL <span>PRINCIPAL</span></div>
+    <div class="page-desc" id="dash-desc">// Resumen del torneo</div>
+    <div class="stats-row" id="stats-row"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="card"><div class="card-title">Últimos Resultados</div><div id="dash-recent"></div></div>
+      <div class="card"><div class="card-title">Líderes</div><div id="dash-leaders"></div></div>
+    </div>
+  </div>
+
+  <!-- TEAMS -->
+  <div class="page" id="page-teams">
+    <div class="page-title">GESTIÓN DE <span>EQUIPOS</span></div>
+    <div class="page-desc">// Agregar, editar y retirar equipos</div>
+    <div class="card">
+      <div class="card-title">Agregar Equipo</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre del equipo</label><input type="text" id="inp-team-name" placeholder="Ej: Los Águilas" onkeydown="if(event.key==='Enter')addTeam()"></div>
+        <div class="form-group" style="max-width:130px;"><label>Siglas</label><input type="text" id="inp-team-abbr" placeholder="ÁGL" maxlength="3" style="text-transform:uppercase"></div>
+        <button class="btn btn-primary" onclick="addTeam()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Equipos Registrados</div><div class="teams-grid" id="teams-grid"></div></div>
+  </div>
+
+  <!-- MATCHES -->
+  <div class="page" id="page-matches">
+    <div class="page-title">PARTIDOS Y <span>RESULTADOS</span></div>
+    <div class="page-desc">// Emparejamiento y carga de marcadores por sets</div>
+    <div class="card">
+      <div class="card-title">Generar Emparejamiento</div>
+      <div class="form-row">
+        <div class="form-group"><label>Equipo 1</label><select id="sel-team1"><option value="">— seleccionar —</option></select></div>
+        <div class="form-group"><label>Equipo 2</label><select id="sel-team2"><option value="">— seleccionar —</option></select></div>
+        <div class="form-group" style="max-width:175px;"><label>Ronda / Fase</label><input type="text" id="inp-round" placeholder="Ej: Fase de grupos"></div>
+        <button class="btn btn-accent2" onclick="createMatch()">? Crear Partido</button>
+        <button class="btn btn-secondary" onclick="autoMatch()">?? Auto-emparejar</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Lista de Partidos</div><div class="matches-list" id="matches-list"></div></div>
+  </div>
+
+  <!-- STANDINGS -->
+  <div class="page" id="page-standings">
+    <div class="page-title">TABLA DE <span>POSICIONES</span></div>
+    <div class="page-desc">// Clasificación general del torneo</div>
+    <div class="card">
+      <table class="standings-table">
+        <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>P</th><th>Sets G</th><th>Sets P</th><th>Pts</th></tr></thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="page-profile">
+    <div class="page-title">MI <span>PERFIL</span></div>
+    <div class="page-desc">// Información de tu cuenta</div>
+    <div class="profile-grid">
+      <div class="card">
+        <div class="card-title">Cuenta</div>
+        <div class="profile-avatar-big" id="profile-avatar">?</div>
+        <div style="font-size:17px;font-weight:600;margin-bottom:7px;" id="profile-name">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-bottom:4px;" id="profile-email">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--border);" id="profile-since">—</div>
+        <div style="margin-top:20px;"><button class="btn-full danger-btn" onclick="doLogout()">CERRAR SESIÓN</button></div>
+      </div>
+      <div class="card"><div class="card-title">Estadísticas Globales</div><div id="profile-stats"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuevo torneo -->
+<div class="modal-overlay" id="modal-new-tournament">
+  <div class="modal">
+    <div class="modal-title">Nuevo Torneo</div>
+    <div class="fi"><label>Nombre del torneo</label><input type="text" id="inp-tname" placeholder="Ej: Copa Primavera 2025" onkeydown="if(event.key==='Enter')confirmNewTournament()"></div>
+    <div class="fi"><label>Deporte / Categoría</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol — Masculino"></div>
+    <div class="err-msg" id="tournament-err"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('modal-new-tournament')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmNewTournament()">Crear Torneo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: confirmación -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal">
+    <div class="modal-title" id="mc-title">Confirmar</div>
+    <div id="mc-body"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="mc-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="notif"></div>
+
+<script>
+/* --------------------------------------------
+   ??  CONFIGURACIÓN SUPABASE
+   Reemplazá estos dos valores con los de tu proyecto en supabase.com
+-------------------------------------------- */
+const SUPABASE_URL     = 'https://TU_PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI';
+
+/* --------------------------------------------
+   INIT
+-------------------------------------------- */
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const VALID_KEYS = ['NEWC-2025-TOUR-001','DEMO-DEMO-DEMO-000','NCMT-2025-PREM-999','NEWC-BETA-TEST-100'];
+
+let currentUser = null;
+let currentTournament = null;
+let state = { teams:[], matches:[], matchCounter:1 };
+
+function isConfigured() {
+  return !SUPABASE_URL.includes('TU_PROYECTO') && !SUPABASE_ANON_KEY.includes('TU_ANON_KEY');
+}
+
+/* --------------------------------------------
+   BOOT
+-------------------------------------------- */
+async function boot() {
+  show('loading-screen');
+  const licOk = localStorage.getItem('newcom_lic');
+
+  if (!isConfigured()) {
+    // MODO DEMO: sin Supabase, todo en localStorage
+    await new Promise(r => setTimeout(r, 600));
+    hide('loading-screen');
+    if (!licOk) { show('license-screen'); return; }
+    currentUser = { id:'demo', email:'demo@newcom.local', user_metadata:{ name:'Usuario Demo' }, created_at: new Date().toISOString() };
+    showApp();
+    return;
+  }
+
+  const { data:{ session } } = await db.auth.getSession();
+  hide('loading-screen');
+  if (!licOk) { show('license-screen'); return; }
+  if (session?.user) { currentUser = session.user; showApp(); }
+  else show('auth-screen');
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+function fadeOut(id, cb) {
+  const el = document.getElementById(id);
+  el.style.transition='opacity .4s'; el.style.opacity='0';
+  setTimeout(()=>{ hide(id); el.style.opacity=''; el.style.transition=''; cb&&cb(); }, 420);
+}
+
+/* --------------------------------------------
+   LICENSE
+-------------------------------------------- */
+document.getElementById('lic-key').addEventListener('input', function() {
+  let v = this.value.replace(/[^A-Z0-9a-z]/g,'').toUpperCase();
+  let p=[]; for(let i=0;i<v.length&&i<16;i+=4) p.push(v.slice(i,i+4));
+  this.value = p.join('-');
+});
+
+function activateLicense() {
+  const checked = document.getElementById('lic-check').checked;
+  const key = document.getElementById('lic-key').value.trim().toUpperCase();
+  const err = document.getElementById('lic-err');
+  if (!checked) { err.textContent='? Debe aceptar los términos de licencia'; return; }
+  if (!key) { err.textContent='? Ingrese la clave de activación'; return; }
+  if (!VALID_KEYS.includes(key)) { err.textContent='? Clave de activación inválida'; return; }
+  localStorage.setItem('newcom_lic','1');
+  fadeOut('license-screen', () => {
+    if (!isConfigured()) {
+      currentUser = { id:'demo', email:'demo@newcom.local', user_metadata:{name:'Usuario Demo'}, created_at:new Date().toISOString() };
+      showApp();
+    } else show('auth-screen');
+  });
+}
+/* --------------------------------------------
+   AUTH
+-------------------------------------------- */
+function switchTab(tab) {
+  document.getElementById('form-login').style.display = tab==='login'?'':'none';
+  document.getElementById('form-register').style.display = tab==='register'?'':'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+}
+
+async function doLogin() {
+  const email=document.getElementById('login-email').value.trim();
+  const pass =document.getElementById('login-pass').value;
+  const err  =document.getElementById('login-err');
+  err.textContent='';
+  if (!email||!pass) { err.textContent='Completá todos los campos'; return; }
+  const btn=document.getElementById('btn-login'); btn.disabled=true; btn.textContent='INGRESANDO...';
+  const { data, error } = await db.auth.signInWithPassword({ email, password:pass });
+  btn.disabled=false; btn.textContent='INGRESAR';
+  if (error) { err.textContent='? '+authErr(error.message); return; }
+  currentUser=data.user;
+  fadeOut('auth-screen', showApp);
+}
+
+async function doRegister() {
+  const name =document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass =document.getElementById('reg-pass').value;
+  const err  =document.getElementById('reg-err');
+  err.textContent='';
+  if (!name||!email||!pass) { err.textContent='Completá todos los campos'; return; }
+  if (pass.length<6) { err.textContent='La contraseña debe tener al menos 6 caracteres'; return; }
+  const btn=document.getElementById('btn-register'); btn.disabled=true; btn.textContent='CREANDO...';
+  const { data, error } = await db.auth.signUp({ email, password:pass, options:{data:{name}} });
+  btn.disabled=false; btn.textContent='CREAR CUENTA';
+  if (error) { err.textContent='? '+authErr(error.message); return; }
+  if (data.user && !data.session) {
+    err.style.color='var(--win)';
+    err.textContent='? Cuenta creada. Revisá tu email para confirmar.';
+    return;
+  }
+  currentUser=data.user;
+  fadeOut('auth-screen', showApp);
+}
+
+async function doLogout() {
+  if (isConfigured()) await db.auth.signOut();
+  currentUser=null; currentTournament=null; state={teams:[],matches:[],matchCounter:1};
+  const app=document.getElementById('app'); app.classList.remove('visible'); app.style.display='none';
+  show('auth-screen');
+}
+
+function authErr(msg) {
+  if (msg.includes('Invalid login')) return 'Email o contraseña incorrectos';
+  if (msg.includes('already registered')) return 'Este email ya está registrado';
+  if (msg.includes('Password should')) return 'La contraseña debe tener al menos 6 caracteres';
+  return msg;
+}
+
+/* --------------------------------------------
+   APP INIT
+-------------------------------------------- */
+function showApp() {
+  const app=document.getElementById('app');
+  app.style.display='block';
+  setTimeout(()=>app.classList.add('visible'),10);
+  const name = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || '?';
+  const ini = name.slice(0,2).toUpperCase();
+  document.getElementById('hdr-avatar').textContent = ini;
+  document.getElementById('hdr-uname').textContent = name;
+  goToTournaments();
+}
+
+/* --------------------------------------------
+   TOURNAMENTS
+-------------------------------------------- */
+async function goToTournaments() {
+  currentTournament=null; state={teams:[],matches:[],matchCounter:1};
+  document.getElementById('hdr-tournament').style.display='none';
+  document.getElementById('hdr-nav').style.display='none';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-tournaments').classList.add('active');
+  await loadTournaments();
+}
+
+function getTournamentsKey() { return 'newcom_t_'+currentUser.id; }
+async function loadTournaments() {
+  const grid=document.getElementById('tournaments-grid');
+  grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px 0;">Cargando...</div>';
+  let list=[];
+  if (isConfigured()) {
+    const { data }=await db.from('tournaments').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+    list=data||[];
+  } else {
+    const raw=localStorage.getItem(getTournamentsKey());
+    list=raw?JSON.parse(raw):[];
+  }
+  grid.innerHTML='';
+  grid.innerHTML+=`<div class="new-tc" onclick="openNewTournamentModal()"><div class="new-tc-icon">+</div><div class="new-tc-lbl">Nuevo Torneo</div></div>`;
+  if (!list.length) {
+    grid.innerHTML+=`<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">??</div><div class="empty-msg">No tenés torneos creados</div><div class="empty-sub">Creá tu primer torneo</div></div>`;
+    return;
+  }
+  list.forEach(t=>{
+    const teams=(t.data?.teams?.filter(x=>x.active).length)||0;
+    const done=(t.data?.matches?.filter(x=>x.status==='done').length)||0;
+    const total=(t.data?.matches?.length)||0;
+    const date=new Date(t.created_at||Date.now()).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
+    const tJson = JSON.stringify(t).replace(/"/g,'&quot;');
+    grid.innerHTML+=`
+      <div class="tournament-card" onclick="selectTournament(this)" data-t="${tJson}">
+        <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')" title="Eliminar">?</button>
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-meta">
+          <span>? ${t.sport||'—'}</span>
+          <span>?? ${teams} equipos</span>
+          <span>?? ${done}/${total} partidos</span>
+        </div>
+        <div class="tc-date">Creado el ${date}</div>
+      </div>`;
+  });
+}
+
+function openNewTournamentModal() {
+  document.getElementById('inp-tname').value='';
+  document.getElementById('inp-tsport').value='';
+  document.getElementById('tournament-err').textContent='';
+  openModal('modal-new-tournament');
+  setTimeout(()=>document.getElementById('inp-tname').focus(),100);
+}
+
+async function confirmNewTournament() {
+  const name =document.getElementById('inp-tname').value.trim();
+  const sport=document.getElementById('inp-tsport').value.trim();
+  const err  =document.getElementById('tournament-err');
+  if (!name) { err.textContent='Ingresá el nombre del torneo'; return; }
+  const t={
+    id: Date.now().toString(), name, sport,
+    user_id: currentUser.id,
+    created_at: new Date().toISOString(),
+    data: { teams:[], matches:[], matchCounter:1 }
+  };
+  if (isConfigured()) {
+    const { error }=await db.from('tournaments').insert([{ id:t.id, name, sport, user_id:t.user_id, created_at:t.created_at, data:t.data }]);
+    if (error) { err.textContent='Error: '+error.message; return; }
+  } else {
+    const raw=localStorage.getItem(getTournamentsKey());
+    const list=raw?JSON.parse(raw):[];
+    list.unshift(t);
+    localStorage.setItem(getTournamentsKey(),JSON.stringify(list));
+  }
+  closeModal('modal-new-tournament');
+  notify('Torneo "'+name+'" creado ?');
+  selectTournamentObj(t);
+}
+
+function selectTournament(el) {
+  try { selectTournamentObj(JSON.parse(el.dataset.t)); } catch(e){}
+}
+
+function selectTournamentObj(t) {
+  currentTournament=t;
+  state=t.data||{teams:[],matches:[],matchCounter:1};
+  if (!state.matchCounter) state.matchCounter=1;
+  document.getElementById('hdr-tname').textContent=t.name;
+  document.getElementById('hdr-tournament').style.display='flex';
+  document.getElementById('hdr-nav').style.display='flex';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-dashboard').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderAll();
+}
+
+async function deleteTournament(id) {
+  openConfirm('Eliminar torneo','¿Eliminar este torneo? Se perderán todos los datos.',async()=>{
+    if (isConfigured()) {
+      await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id);
+    } else {
+      const raw=localStorage.getItem(getTournamentsKey());
+      const list=raw?JSON.parse(raw):[];
+      localStorage.setItem(getTournamentsKey(),JSON.stringify(list.filter(t=>t.id!==id)));
+    }
+    notify('Torneo eliminado');
+    loadTournaments();
+  });
+}
+
+/* --------------------------------------------
+   SAVE
+-------------------------------------------- */
+async function save() {
+  if (!currentTournament) return;
+  currentTournament.data=state;
+  if (isConfigured()) {
+    await db.from('tournaments').update({data:state}).eq('id',currentTournament.id);
+  } else {
+    const raw=localStorage.getItem(getTournamentsKey());
+    const list=raw?JSON.parse(raw):[];
+    const idx=list.findIndex(t=>t.id===currentTournament.id);
+    if (idx>=0) list[idx].data=state; else list.unshift(currentTournament);
+    localStorage.setItem(getTournamentsKey(),JSON.stringify(list));
+  }
+}
+
+/* --------------------------------------------
+   NAVIGATION
+-------------------------------------------- */
+function showPage(id, event) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (event?.currentTarget?.classList?.contains('nav-btn')) event.currentTarget.classList.add('active');
+  if (id==='matches') renderMatchSelects();
+  if (id==='profile') renderProfile();
+  renderAll();
+}
+
+/* --------------------------------------------
+   TEAMS
+-------------------------------------------- */
+async function addTeam() {
+  const name=document.getElementById('inp-team-name').value.trim();
+  const abbr=document.getElementById('inp-team-abbr').value.trim().toUpperCase()||name.slice(0,3).toUpperCase();
+  if (!name){notify('Ingresá el nombre del equipo',true);return;}
+  if (state.teams.find(t=>t.name.toLowerCase()===name.toLowerCase())){notify('Ya existe ese equipo',true);return;}
+  state.teams.push({id:Date.now(),name,abbr,active:true});
+  document.getElementById('inp-team-name').value='';
+  document.getElementById('inp-team-abbr').value='';
+  await save(); renderAll();
+  notify(`Equipo "${name}" agregado ?`);
+}
+
+function removeTeam(id) {
+  const t=state.teams.find(t=>t.id===id);
+  openConfirm('Retirar equipo',`¿Retirás al equipo <strong>${t.name}</strong>?`,async()=>{
+    t.active=false; await save(); renderAll();
+    notify(`"${t.name}" retirado`);
+  });
+}
+
+function renderTeams() {
+  const g=document.getElementById('teams-grid'); if(!g) return;
+  const all=[...state.teams.filter(t=>t.active),...state.teams.filter(t=>!t.active)];
+  if (!all.length){
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">??</div><div class="empty-msg">Sin equipos registrados</div><div class="empty-sub">Agrega el primero arriba</div></div>`;
+    return;
+  }
+  g.innerHTML=all.map(t=>`
+    <div class="team-card ${t.active?'':'eliminated'}">
+      <div class="team-badge">${t.abbr}</div>
+      <div class="team-info">
+        <div class="team-name">${t.name}</div>
+        <div class="team-meta">${t.active?'? ACTIVO':'? RETIRADO'}</div>
+      </div>
+      ${t.active?`<button class="btn-remove" onclick="removeTeam(${t.id})">?</button>`:''}
+    </div>`).join('');
+}
+
+/* --------------------------------------------
+   MATCHES
+-------------------------------------------- */
+function renderMatchSelects() {
+  const active=state.teams.filter(t=>t.active);
+  ['sel-team1','sel-team2'].forEach(sid=>{
+    const s=document.getElementById(sid); if(!s) return;
+    s.innerHTML='<option value="">— seleccionar —</option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  });
+}
+
+async function createMatch(t1id,t2id,round) {
+  const id1=t1id||parseInt(document.getElementById('sel-team1').value);
+  const id2=t2id||parseInt(document.getElementById('sel-team2').value);
+  const rnd=round||document.getElementById('inp-round').value.trim()||'Fase de grupos';
+  if (!id1||!id2){notify('Seleccioná ambos equipos',true);return;}
+  if (id1===id2){notify('No podés emparejar un equipo consigo mismo',true);return;}
+  const ex=state.matches.find(m=>m.status==='pending'&&((m.t1===id1&&m.t2===id2)||(m.t1===id2&&m.t2===id1)));
+  if (ex){notify('Ya existe ese partido pendiente',true);return;}
+  state.matches.push({id:state.matchCounter++,t1:id1,t2:id2,round:rnd,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null});
+  if (!t1id){
+    document.getElementById('sel-team1').value='';
+    document.getElementById('sel-team2').value='';
+    document.getElementById('inp-round').value='';
+  }
+  await save(); renderAll(); renderMatchSelects();
+  notify('Partido creado ?');
+}
+
+async function autoMatch() {
+  const active=state.teams.filter(t=>t.active);
+  if (active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
+  const sh=[...active].sort(()=>Math.random()-.5);
+  let created=0;
+  for (let i=0;i<sh.length-1;i+=2){
+    const t1=sh[i].id,t2=sh[i+1].id;
+    const ex=state.matches.find(m=>m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
+    if (!ex){await createMatch(t1,t2,'Auto - Ronda '+(Math.floor(state.matchCounter/2)+1));created++;}
+  }
+  if (!created) notify('No se generaron nuevos partidos',true);
+  else notify(`${created} partido(s) generado(s) ?`);
+}
+
+async function addSet(mid) {
+  const m=state.matches.find(m=>m.id===mid);
+  if (!m||m.sets.length>=4){notify('Máximo 4 sets por partido',true);return;}
+  m.sets.push({s1:'',s2:''});
+  await save(); renderMatches();
+}
+
+async function removeSet(mid,idx) {
+  const m=state.matches.find(m=>m.id===mid);
+  if (!m||m.sets.length<=2){notify('Mínimo 2 sets por partido',true);return;}
+  m.sets.splice(idx,1);
+  await save(); renderMatches();
+}
+
+async function updateScore(mid,si,side,val) {
+  const m=state.matches.find(m=>m.id===mid); if(!m) return;
+  m.sets[si][side]=val===''?'':parseInt(val)||0;
+  await save();
+}
+
+async function saveMatch(mid) {
+  const m=state.matches.find(m=>m.id===mid); if(!m) return;
+  let w1=0,w2=0;
+  m.sets.forEach(s=>{
+    const v1=(s.s1===''||s.s1===null)?0:parseInt(s.s1)||0;
+    const v2=(s.s2===''||s.s2===null)?0:parseInt(s.s2)||0;
+    s.s1=v1; s.s2=v2;
+    if(v1>v2) w1++; else if(v2>v1) w2++;
+  });
+  if(w1===0&&w2===0){notify('Ingresá al menos un set con ganador',true);return;}
+  if(Math.abs(w1-w2)!==2){notify(`Resultado inválido (${w1}-${w2}). El ganador debe superar por exactamente 2 sets`,true);return;}
+  m.winner=w1>w2?m.t1:m.t2; m.status='done';
+  await save(); renderAll();
+  const winner=state.teams.find(t=>t.id===m.winner);
+  notify(`Guardado — Ganador: ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ?`);
+}
+
+async function deleteMatch(mid) {
+  openConfirm('Eliminar partido','¿Eliminar este partido?',async()=>{
+    state.matches=state.matches.filter(m=>m.id!==mid);
+    await save(); renderAll(); notify('Partido eliminado');
+  });
+}
+
+function renderMatches() {
+  const el=document.getElementById('matches-list'); if(!el) return;
+  if(!state.matches.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">?</div><div class="empty-msg">Sin partidos creados</div><div class="empty-sub">Creá un emparejamiento arriba</div></div>`;
+    return;
+  }
+  el.innerHTML=state.matches.map(m=>{
+    const t1=state.teams.find(t=>t.id===m.t1);
+    const t2=state.teams.find(t=>t.id===m.t2);
+    const done=m.status==='done';
+    const t1w=m.winner===m.t1,t2w=m.winner===m.t2;
+    const sh=m.sets.map((s,i)=>`
+      <div class="set-block">
+        <div class="set-label">SET ${i+1}</div>
+        <div class="set-scores">
+          <input class="score-inp" type="number" min="0" max="99" value="${s.s1}" placeholder="0"
+            onchange="updateScore(${m.id},${i},'s1',this.value)" ${done?'disabled':''}>
+          <span class="score-sep">:</span>
+          <input class="score-inp" type="number" min="0" max="99" value="${s.s2}" placeholder="0"
+            onchange="updateScore(${m.id},${i},'s2',this.value)" ${done?'disabled':''}>
+          ${!done&&m.sets.length>2?`<button class="rem-set-btn" onclick="removeSet(${m.id},${i})">-</button>`:''}
+        </div>
+      </div>`).join('');
+    return `
+      <div class="match-card ${done?'completed':''}">
+        <div class="match-num">#${m.id}</div>
+        <div class="match-body">
+          <div class="round-tag">${m.round}</div>
+          <div class="match-teams">
+            <div class="match-team ${done?(t1w?'winner':'loser'):''}">${t1?t1.name:'?'}</div>
+            <div class="match-vs">VS</div>
+            <div class="match-team ${done?(t2w?'winner':'loser'):''}">${t2?t2.name:'?'}</div>
+          </div>
+          <div class="match-sets">
+            ${sh}
+            ${!done&&m.sets.length<4?`<button class="add-set-btn" onclick="addSet(${m.id})">+</button>`:''}
+          </div>
+        </div>
+        <div class="match-actions">
+          <span class="match-status ${done?'status-done':'status-pending'}">${done?'? Finalizado':'Pendiente'}</span>
+          ${!done?`<button class="btn btn-success" style="font-size:11px;padding:6px 11px;" onclick="saveMatch(${m.id})">Guardar resultado</button>`:''}
+          <button class="btn btn-danger" style="font-size:11px;padding:5px 9px;" onclick="deleteMatch(${m.id})">Eliminar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* --------------------------------------------
+   STANDINGS
+-------------------------------------------- */
+function calcStandings() {
+  const s={};
+  state.teams.forEach(t=>{s[t.id]={team:t,pj:0,g:0,p:0,sg:0,sp:0,pts:0};});
+  state.matches.filter(m=>m.status==='done').forEach(m=>{
+    if(!s[m.t1]||!s[m.t2]) return;
+    let sg1=0,sg2=0;
+    m.sets.forEach(x=>{if(x.s1!==''&&x.s2!==''){if(x.s1>x.s2)sg1++;else if(x.s2>x.s1)sg2++;}});
+    s[m.t1].pj++;s[m.t2].pj++;
+    s[m.t1].sg+=sg1;s[m.t1].sp+=sg2;
+    s[m.t2].sg+=sg2;s[m.t2].sp+=sg1;
+    if(m.winner===m.t1){s[m.t1].g++;s[m.t1].pts+=3;s[m.t2].p++;}
+    else{s[m.t2].g++;s[m.t2].pts+=3;s[m.t1].p++;}
+  });
+  return Object.values(s).sort((a,b)=>b.pts-a.pts||(b.sg-b.sp)-(a.sg-a.sp));
+}
+
+function renderStandings() {
+  const body=document.getElementById('standings-body'); if(!body) return;
+  const rows=calcStandings();
+  if(!rows.length||!rows.some(r=>r.pj>0)){
+    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:34px;color:var(--text-muted);">Sin datos aún</td></tr>`;
+    return;
+  }
+  body.innerHTML=rows.map((r,i)=>{
+    const p=i+1,cls=p===1?'pos-1':p===2?'pos-2':p===3?'pos-3':'pos-n';
+    return `<tr>
+      <td><div class="pos-badge ${cls}">${p}</div></td>
+      <td><strong>${r.team.name}</strong> <span style="color:var(--text-muted);font-size:10px;">${r.team.abbr}</span></td>
+      <td>${r.pj}</td>
+      <td><span class="stat-pill stat-w">${r.g}</span></td>
+      <td><span class="stat-pill stat-l">${r.p}</span></td>
+      <td>${r.sg}</td><td>${r.sp}</td>
+      <td><span class="stat-pill stat-s">${r.pts}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* --------------------------------------------
+   DASHBOARD
+-------------------------------------------- */
+function renderDashboard() {
+  const sr=document.getElementById('stats-row'); if(!sr) return;
+  const active=state.teams.filter(t=>t.active).length;
+  const total=state.matches.length,done=state.matches.filter(m=>m.status==='done').length;
+  sr.innerHTML=`
+    <div class="stat-card"><div class="stat-val">${active}</div><div class="stat-lbl">Equipos Activos</div></div>
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">Partidos</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--win)">${done}</div><div class="stat-lbl">Finalizados</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${total-done}</div><div class="stat-lbl">Pendientes</div></div>`;
+
+  const rec=document.getElementById('dash-recent');
+  const dm=state.matches.filter(m=>m.status==='done').slice(-5).reverse();
+  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin resultados aún</div>':
+    dm.map(m=>{
+      const w=state.teams.find(t=>t.id===m.winner);
+      const l=state.teams.find(t=>t.id===(m.winner===m.t1?m.t2:m.t1));
+      const sc=m.sets.filter(s=>s.s1!==''&&s.s2!=='').map(s=>`${s.s1}-${s.s2}`).join(' | ');
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div><span style="color:var(--win);font-weight:600;">${w?w.name:'?'}</span> <span style="color:var(--text-muted);font-size:12px;">vs ${l?l.name:'?'}</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">${sc}</div>
+      </div>`;
+    }).join('');
+
+  const ld=document.getElementById('dash-leaders');
+  const st=calcStandings().filter(r=>r.pj>0).slice(0,5);
+  ld.innerHTML=!st.length?'<div style="color:var(--text-muted);font-size:13px;padding:10px 0;">Sin clasificación aún</div>':
+    st.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div class="pos-badge ${i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n'}">${i+1}</div>
+        <div style="flex:1;font-weight:600;">${r.team.name}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);">${r.pts} pts</div>
+      </div>`).join('');
+}
+
+/* --------------------------------------------
+   PROFILE
+-------------------------------------------- */
+async function renderProfile() {
+  const name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'?';
+  document.getElementById('profile-avatar').textContent=name.slice(0,2).toUpperCase();
+  document.getElementById('profile-name').textContent=name;
+  document.getElementById('profile-email').textContent=currentUser?.email||'—';
+  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  document.getElementById('profile-since').textContent='Miembro desde '+since;
+
+  let list=[];
+  if (isConfigured()) {
+    const {data}=await db.from('tournaments').select('data').eq('user_id',currentUser.id);
+    list=data||[];
+  } else {
+    const raw=localStorage.getItem(getTournamentsKey());
+    list=raw?JSON.parse(raw):[];
+  }
+  let nt=list.length,nteams=0,nmatches=0;
+  list.forEach(t=>{nteams+=(t.data?.teams?.filter(x=>x.active).length||0);nmatches+=(t.data?.matches?.filter(x=>x.status==='done').length||0);});
+  document.getElementById('profile-stats').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${[['Torneos creados',nt],['Equipos registrados',nteams],['Partidos jugados',nmatches]].map(([lbl,val])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--text-muted);">${lbl}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);">${val}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* --------------------------------------------
+   RENDER ALL
+-------------------------------------------- */
+function renderAll() {
+  if (!currentTournament) return;
+  renderTeams(); renderMatches(); renderStandings(); renderDashboard();
+}
+
+/* --------------------------------------------
+   MODALS
+-------------------------------------------- */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openConfirm(title,body,cb){
+  document.getElementById('mc-title').textContent=title;
+  document.getElementById('mc-body').innerHTML=`<p style="color:var(--text-muted);font-size:13px;line-height:1.7;">${body}</p>`;
+  document.getElementById('mc-btn').onclick=()=>{cb&&cb();closeModal('modal-confirm');};
+  openModal('modal-confirm');
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
+
+/* --------------------------------------------
+   NOTIFICATION
+-------------------------------------------- */
+let _nt;
+function notify(msg,isErr=false){
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className='show'+(isErr?' danger':'');
+  clearTimeout(_nt); _nt=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+/* --------------------------------------------
+   AUTH STATE (Supabase)
+-------------------------------------------- */
+if (isConfigured()) {
+  db.auth.onAuthStateChange((event)=>{
+    if (event==='SIGNED_OUT') { currentUser=null; currentTournament=null; }
+  });
+}
+
+boot();
+</script>
+</body>
+</html>
