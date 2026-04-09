@@ -819,7 +819,7 @@ async function loadTournaments(){
       <div class="tournament-card" onclick="selectTournament(this)" data-t="${tJson}">
         <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')">✕</button>
         <div class="tc-name">${t.name}</div>
-        <div class="tc-meta"><span>⚽ ${t.sport||'—'}</span><span>👥 ${teams} equipos</span><span>📋 ${done}/${total}</span></div>
+        <div class="tc-meta"><span>🏐 ${t.sport||'—'}</span><span>👥 ${teams} equipos</span><span>📋 ${done}/${total}</span></div>
         <div class="tc-cats">${catPills||'<span style="font-size:10px;color:var(--text-muted);">Sin categorías</span>'}</div>
         <div class="tc-date">Creado ${date}</div>
       </div>`;
