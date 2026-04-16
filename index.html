@@ -503,7 +503,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       <div class="form-row">
         <div class="form-group">
           <label>Categoría</label>
-          <select id="inp-team-cat"></select>
+          <select id="inp-team-cat" onchange="onTeamCatChange()"></select>
         </div>
         <div class="form-group">
           <label>Nombre del equipo</label>
@@ -937,12 +937,20 @@ async function addCategory(){
   }
   const cat={id:Date.now(),age:newCatAge,gender:newCatGender};
   state.categories.push(cat);
+  // Set this as active in all sections
+  activeTab.teams=cat.id;
+  activeTab.matches=cat.id;
+  activeTab.standings=cat.id;
   newCatAge=null;newCatGender=null;
   document.querySelectorAll('.age-opt').forEach(o=>o.classList.remove('sel'));
   document.querySelectorAll('.gender-opt').forEach(o=>o.className='gender-opt');
   err.textContent='';
   await save();
   renderCategories();renderAll();
+  // Sync dropdowns
+  const teamSel=document.getElementById('inp-team-cat');
+  if(teamSel)teamSel.value=cat.id;
+  renderMatchSelects();
   notify(`Categoría ${cat.age} ${cat.gender} agregada ✓`);
 }
 async function removeCategory(id){
@@ -1003,7 +1011,12 @@ function renderCatBar(barId, section){
 }
 function switchCatTab(section,catId){
   activeTab[section]=catId;
-  if(section==='teams'){renderCatBar('teams-cat-bar','teams');renderTeams();}
+  if(section==='teams'){
+    renderCatBar('teams-cat-bar','teams');
+    const sel=document.getElementById('inp-team-cat');
+    if(sel)sel.value=catId;
+    renderTeams();
+  }
   if(section==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();}
   if(section==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
 }
@@ -1015,6 +1028,19 @@ function currentCat(section){
 function renderTeamCatSelect(){
   const sel=document.getElementById('inp-team-cat'); if(!sel)return;
   sel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
+  // Sync with active tab
+  if(activeTab.teams)sel.value=activeTab.teams;
+}
+function onTeamCatChange(){
+  const catId=parseInt(document.getElementById('inp-team-cat').value);
+  activeTab.teams=catId;
+  activeTab.matches=catId;
+  activeTab.standings=catId;
+  renderCatBar('teams-cat-bar','teams');
+  renderCatBar('matches-cat-bar','matches');
+  renderCatBar('standings-cat-bar','standings');
+  renderMatchSelects();
+  renderTeams();
 }
 
 /* ════════════════════════════════════════════
@@ -1032,11 +1058,18 @@ async function addTeam(){
   state.teams.push({id:Date.now(),name,abbr,categoryId:catId,active:true});
   document.getElementById('inp-team-name').value='';
   document.getElementById('inp-team-abbr').value='';
-  // Switch to this category tab
+  // Switch all tabs to this category
   activeTab.teams=catId;
+  activeTab.matches=catId;
+  activeTab.standings=catId;
   await save();
   renderCatBar('teams-cat-bar','teams');
-  renderTeams();renderDashboard();
+  renderCatBar('matches-cat-bar','matches');
+  renderCatBar('standings-cat-bar','standings');
+  const teamSel=document.getElementById('inp-team-cat');
+  if(teamSel)teamSel.value=catId;
+  renderMatchSelects();
+  renderTeams();renderMatches();renderStandings();renderDashboard();
   notify(`Equipo "${name}" agregado ✓`);
 }
 function removeTeam(id){
@@ -1090,6 +1123,22 @@ function onMatchCatChange(){
   renderCatBar('matches-cat-bar','matches');
   fillTeamSelects(catId);
   renderMatches();
+  // Also sync the category tabs for teams and standings
+  const cat=state.categories.find(c=>c.id===catId);
+  if(cat){
+    const teamTab=document.getElementById('teams-cat-bar');
+    if(teamTab){
+      activeTab.teams=catId;
+      renderCatBar('teams-cat-bar','teams');
+      const teamSel=document.getElementById('inp-team-cat');
+      if(teamSel)teamSel.value=catId;
+    }
+    const standTab=document.getElementById('standings-cat-bar');
+    if(standTab){
+      activeTab.standings=catId;
+      renderCatBar('standings-cat-bar','standings');
+    }
+  }
 }
 function fillTeamSelects(catId){
   const active=catId?state.teams.filter(t=>t.categoryId===catId&&t.active):[];
@@ -1347,13 +1396,27 @@ function renderDashboard(){
 }
 
 function goToCatSection(section, catId){
-  activeTab[section]=catId;
+  // Sync all tabs to the selected category
+  activeTab.teams=catId;
+  activeTab.matches=catId;
+  activeTab.standings=catId;
   showPage(section,null);
   // Activate correct nav button
   const navBtns=document.querySelectorAll('.nav-btn');
   navBtns.forEach(b=>b.classList.remove('active'));
   const map={teams:2,matches:3,standings:4};
   if(map[section]!==undefined)navBtns[map[section]]?.classList.add('active');
+  // Update all category bars and dropdowns
+  renderCatBar('teams-cat-bar','teams');
+  renderCatBar('matches-cat-bar','matches');
+  renderCatBar('standings-cat-bar','standings');
+  const teamSel=document.getElementById('inp-team-cat');
+  if(teamSel)teamSel.value=catId;
+  renderTeamCatSelect();
+  renderMatchSelects();
+  renderTeams();
+  renderMatches();
+  renderStandings();
 }
 
 /* ════════════════════════════════════════════
