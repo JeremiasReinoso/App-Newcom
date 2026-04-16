@@ -448,7 +448,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- DASHBOARD -->
   <div class="page" id="page-dashboard">
     <div class="page-title">PANEL <span>PRINCIPAL</span></div>
-    <div class="page-desc" id="dash-desc">// Resumen del torneo</div>
+    <div class="page-desc" id="dash-desc">Resumen del torneo</div>
     <div class="stats-row" id="stats-row"></div>
     <!-- Category overview cards -->
     <div class="card">
@@ -465,7 +465,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- CATEGORIES MANAGEMENT -->
   <div class="page" id="page-categories">
     <div class="page-title">GESTIÓN DE <span>CATEGORÍAS</span></div>
-    <div class="page-desc">// Agregá las categorías del torneo (edad + género)</div>
+    <div class="page-desc">Agregá las categorías del torneo (edad + género)</div>
     <div class="card">
       <div class="card-title">Agregar Categoría</div>
       <div style="margin-bottom:12px;">
@@ -562,7 +562,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- STANDINGS -->
   <div class="page" id="page-standings">
     <div class="page-title">TABLA DE <span>POSICIONES</span></div>
-    <div class="page-desc">// Clasificación por categoría</div>
+    <div class="page-desc">Clasificación por categoría</div>
     <!-- Category tabs for standings -->
     <div class="cat-bar" id="standings-cat-bar"></div>
     <div class="card">
@@ -577,7 +577,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="page-title">MI <span>PERFIL</span></div>
-    <div class="page-desc">// Información de tu cuenta</div>
+    <div class="page-desc">Información de tu cuenta</div>
     <div class="profile-grid">
       <div class="card">
         <div class="card-title">Cuenta</div>
@@ -597,7 +597,8 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <div class="modal">
     <div class="modal-title">Nuevo Torneo</div>
     <div class="fi"><label>Nombre del torneo</label><input type="text" id="inp-tname" placeholder="Ej: Copa Primavera 2025" onkeydown="if(event.key==='Enter')confirmNewTournament()"></div>
-    <div class="fi"><label>Club</label><input type="text" id="inp-tsport" placeholder="Ej: Voleibol"></div>
+    <div class="fi"><label>Club</label><input type="text" id="inp-tclub" placeholder="Ej: Club Atlético"></div>
+    <div class="fi"><label>Cantidad de canchas</label><input type="number" id="inp-courts" placeholder="Ej: 2" min="1" value="1"></div>
     <div class="err-msg" id="tournament-err"></div>
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="closeModal('modal-new-tournament')">Cancelar</button>
@@ -820,7 +821,7 @@ async function loadTournaments(){
       <div class="tournament-card" onclick="selectTournament(this)" data-t="${tJson}">
         <button class="tc-del" onclick="event.stopPropagation();deleteTournament('${t.id}')">✕</button>
         <div class="tc-name">${t.name}</div>
-        <div class="tc-meta"><span>🏐 ${t.sport||'—'}</span><span>👥 ${teams} equipos</span><span>📋 ${done}/${total}</span></div>
+        <div class="tc-meta"><span>🏐 ${t.club||'—'}</span><span>👥 ${teams} equipos</span><span>📋 ${done}/${total}</span><span>🏸 ${t.courts||1} canchas</span></div>
         <div class="tc-cats">${catPills||'<span style="font-size:10px;color:var(--text-muted);">Sin categorías</span>'}</div>
         <div class="tc-date">Creado ${date}</div>
       </div>`;
@@ -828,21 +829,23 @@ async function loadTournaments(){
 }
 function openNewTournamentModal(){
   document.getElementById('inp-tname').value='';
-  document.getElementById('inp-tsport').value='';
+  document.getElementById('inp-tclub').value='';
+  document.getElementById('inp-courts').value='1';
   document.getElementById('tournament-err').textContent='';
   openModal('modal-new-tournament');
   setTimeout(()=>document.getElementById('inp-tname').focus(),100);
 }
 async function confirmNewTournament(){
   const name=document.getElementById('inp-tname').value.trim();
-  const sport=document.getElementById('inp-tsport').value.trim();
+  const club=document.getElementById('inp-tclub').value.trim();
+  const courts=parseInt(document.getElementById('inp-courts').value)||1;
   const err=document.getElementById('tournament-err');
   if(!name){err.textContent='Ingresá el nombre';return;}
-  const t={id:Date.now().toString(),name,sport,user_id:currentUser.id,
+  const t={id:Date.now().toString(),name,club,courts,user_id:currentUser.id,
     created_at:new Date().toISOString(),
     data:{categories:[],teams:[],matches:[],matchCounter:1}};
   if(isConfigured()){
-    const{error}=await db.from('tournaments').insert([{id:t.id,name,sport,user_id:t.user_id,created_at:t.created_at,data:t.data}]);
+    const{error}=await db.from('tournaments').insert([{id:t.id,name,club,courts,user_id:t.user_id,created_at:t.created_at,data:t.data}]);
     if(error){err.textContent='Error: '+error.message;return;}
   }else{
     const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
