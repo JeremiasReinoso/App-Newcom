@@ -345,6 +345,35 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .fixture-match-n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);width:18px;}
 .fixture-vs{color:var(--text-muted);font-size:10px;}
 
+/* ── WORKFLOW SECTIONS ── */
+.workflow-section{margin-bottom:24px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:4px;}
+.workflow-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.workflow-section-title::before{content:'';width:4px;height:20px;background:var(--accent);display:inline-block;}
+.workflow-section-title .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(0,212,255,.15);color:var(--accent);padding:2px 8px;border-radius:3px;}
+
+.print-header{display:none;}
+.print-only{display:none;}
+
+@media print{
+  @page{margin:1cm;}
+  body{background:#fff;color:#000;font-size:12px;}
+  header,.hdr-user,.nav-btn,.no-print,
+  .workflow-section,.cat-bar,.match-actions,
+  .btn,button,button[class]{display:none !important;}
+  .page{padding:0;max-width:100%;}
+  .print-header{display:block;text-align:center;margin-bottom:20px;}
+  .print-header h1{font-size:20px;margin-bottom:5px;}
+  .print-header p{font-size:11px;color:#666;}
+  .print-only{display:block;}
+  #page-matches .card:not(.print-only){display:none !important;}
+  .fixture-court{background:#f5f5f5;border:1px solid #ccc;margin-bottom:10px;page-break-inside:avoid;}
+  .fixture-court-num{color:#000;border-bottom:1px solid #ccc;}
+  .fixture-match{border-bottom:1px solid #eee;}
+  .fixture-match-n,.fixture-vs{color:#666;}
+  .match-card,.matches-list{display:none !important;}
+  #fixture-card{display:block !important;}
+}
+
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 @media(max-width:700px){
   header{padding:0 11px;height:auto;padding-top:9px;padding-bottom:9px;flex-wrap:wrap;gap:7px;}
@@ -536,32 +565,51 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <!-- MATCHES -->
   <div class="page" id="page-matches">
     <div class="page-title">PARTIDOS Y <span>RESULTADOS</span></div>
-    <div class="page-desc">// Solo se pueden emparejar equipos de la misma categoría</div>
-    <div class="card">
-      <div class="card-title">Generar Emparejamiento</div>
-      <div class="form-row">
+    <div class="page-desc">// Organizá los partidos en 3 pasos: emparejar → fixture → imprimir</div>
+    
+    <!-- Category tabs -->
+    <div class="cat-bar no-print" id="matches-cat-bar"></div>
+
+    <!-- SECCIÓN 1: EMPAREJAMIENTOS -->
+    <div class="workflow-section no-print">
+      <div class="workflow-section-title"><span class="step-num">1</span> EMPAREJAMIENTOS</div>
+      <div class="form-row" style="margin-bottom:12px;">
         <div class="form-group" style="max-width:180px;">
           <label>Categoría</label>
           <select id="sel-match-cat" onchange="onMatchCatChange()"></select>
         </div>
-        <div class="form-group">
-          <label>Equipo 1</label>
-          <select id="sel-team1"><option value="">— seleccionar —</option></select>
+      </div>
+      
+      <!-- Modo automático -->
+      <div style="margin-bottom:16px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Modo automático</div>
+        <button class="btn btn-primary" onclick="autoMatch()">⚡ Generar Emparejamientos</button>
+      </div>
+      
+      <!-- Modo manual -->
+      <div style="padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Modo manual</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Equipo 1</label>
+            <select id="sel-team1"><option value="">— seleccionar —</option></select>
+          </div>
+          <div class="form-group">
+            <label>Equipo 2</label>
+            <select id="sel-team2"><option value="">— seleccionar —</option></select>
+          </div>
+          <div class="form-group" style="max-width:160px;">
+            <label>Ronda / Fase</label>
+            <input type="text" id="inp-round" placeholder="Ej: Grupos">
+          </div>
+          <button class="btn btn-accent2" onclick="createMatch()">➕ Agregar Partido</button>
         </div>
-        <div class="form-group">
-          <label>Equipo 2</label>
-          <select id="sel-team2"><option value="">— seleccionar —</option></select>
-        </div>
-        <div class="form-group" style="max-width:160px;">
-          <label>Ronda / Fase</label>
-          <input type="text" id="inp-round" placeholder="Ej: Grupos">
-        </div>
-        <button class="btn btn-accent2" onclick="createMatch()">⚡ Crear</button>
-        <button class="btn btn-secondary" onclick="autoMatch()">🔀 Auto</button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Generar Fixture por Canchas</div>
+
+    <!-- SECCIÓN 2: FIXTURE -->
+    <div class="workflow-section no-print">
+      <div class="workflow-section-title"><span class="step-num">2</span> FIXTURE</div>
       <div class="form-row">
         <div class="form-group" style="max-width:100px;">
           <label>Canchas</label>
@@ -578,13 +626,24 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
         <button class="btn btn-primary" onclick="generateFixture()">🏸 Generar Fixture</button>
       </div>
     </div>
-    <!-- Category tabs for matches -->
-    <div class="cat-bar" id="matches-cat-bar"></div>
+
+    <!-- SECCIÓN 3: IMPRESIÓN -->
+    <div class="workflow-section no-print" id="print-section" style="display:none;">
+      <div class="workflow-section-title"><span class="step-num">3</span> IMPRESIÓN</div>
+      <button class="btn btn-primary" onclick="printFixture()">🖨️ Imprimir Fixture</button>
+    </div>
+
     <!-- Fixture display -->
-    <div class="card" id="fixture-card" style="display:none;">
+    <div class="card print-only" id="fixture-card">
+      <div class="print-header">
+        <h1>NEWCOM — Fixture</h1>
+        <p id="print-tournament-name"></p>
+      </div>
       <div class="card-title">FIXTURE POR CANCHAS</div>
       <div class="fixture-grid" id="fixture-grid"></div>
     </div>
+
+    <!-- Partidos list -->
     <div class="card">
       <div class="card-title" id="matches-cat-title">Partidos</div>
       <div class="matches-list" id="matches-list"></div>
@@ -689,6 +748,7 @@ let currentTournament = null;
 // state.teams      = [{id, name, abbr, categoryId, active}]
 // state.matches    = [{id, t1, t2, categoryId, round, sets, status, winner}]
 let state = { categories:[], teams:[], matches:[], matchCounter:1 };
+let currentFixtureCourts = [];
 
 // Active category tab per section
 let activeTab = { teams: null, matches: null, standings: null };
@@ -818,7 +878,7 @@ function showApp(){
 ════════════════════════════════════════════ */
 function getTKey(){return 'newcom_t_'+currentUser.id;}
 async function goToTournaments(){
-  currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};
+  currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};currentFixtureCourts=[];
   document.getElementById('hdr-tournament').style.display='none';
   document.getElementById('hdr-nav').style.display='none';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -890,6 +950,7 @@ async function confirmNewTournament(){
 function selectTournament(el){ try{selectTournamentObj(JSON.parse(el.dataset.t));}catch(e){} }
 function selectTournamentObj(t){
   currentTournament=t;
+  currentFixtureCourts=[];
   state=t.data||{categories:[],teams:[],matches:[],matchCounter:1};
   if(!state.categories)state.categories=[];
   if(!state.matchCounter)state.matchCounter=1;
@@ -942,7 +1003,19 @@ function showPage(id,event){
   document.getElementById('page-'+id).classList.add('active');
   if(event?.currentTarget?.classList?.contains('nav-btn'))event.currentTarget.classList.add('active');
   if(id==='teams'){renderCatBar('teams-cat-bar','teams');renderTeamCatSelect();renderTeams();}
-  if(id==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();const fc=document.getElementById('fixture-card');if(fc)fc.style.display='none';}
+  if(id==='matches'){
+    renderCatBar('matches-cat-bar','matches');
+    renderMatchSelects();
+    renderMatches();
+    const fc=document.getElementById('fixture-card');
+    const ps=document.getElementById('print-section');
+    if(currentFixtureCourts.length>0){
+      renderFixture(currentFixtureCourts);
+    }else{
+      if(fc)fc.style.display='none';
+      if(ps)ps.style.display='none';
+    }
+  }
   if(id==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
   if(id==='categories'){renderCategories();}
   if(id==='profile')renderProfile();
@@ -1258,15 +1331,23 @@ async function generateFixture(){
   renderDashboard();
   notify(`Fixture generado: ${totalMatches} partidos en ${numCourts} canchas ✓`);
 }
+function printFixture(){
+  window.print();
+}
 function renderFixture(courts){
   const grid=document.getElementById('fixture-grid');
   const card=document.getElementById('fixture-card');
+  const printSec = document.getElementById('print-section');
   if(!grid||!card)return;
   if(!courts||courts.length===0||courts.every(c=>c.partidos.length===0)){
     card.style.display='none';
+    if(printSec)printSec.style.display='none';
     return;
   }
+  currentFixtureCourts = courts;
   card.style.display='block';
+  if(printSec)printSec.style.display='block';
+  document.getElementById('print-tournament-name').textContent = currentTournament?.name || '';
   grid.innerHTML=courts.map(c=>`
     <div class="fixture-court">
       <div class="fixture-court-num">🏸 CANCHA ${c.numero}</div>
