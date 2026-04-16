@@ -1344,11 +1344,24 @@ function renderFixture(courts){
     if(printSec)printSec.style.display='none';
     return;
   }
+  const validCourts = courts.map(c => ({
+    numero: c.numero,
+    partidos: c.partidos.filter(m => {
+      const t1 = state.teams.find(t => t.id === m.t1);
+      const t2 = state.teams.find(t => t.id === m.t2);
+      return t1 && t2;
+    })
+  })).filter(c => c.partidos.length > 0);
+  if(validCourts.length === 0){
+    card.style.display='none';
+    if(printSec)printSec.style.display='none';
+    return;
+  }
   currentFixtureCourts = courts;
   card.style.display='block';
   if(printSec)printSec.style.display='block';
   document.getElementById('print-tournament-name').textContent = currentTournament?.name || '';
-  grid.innerHTML=courts.map(c=>`
+  grid.innerHTML=validCourts.map(c=>`
     <div class="fixture-court">
       <div class="fixture-court-num">🏸 CANCHA ${c.numero}</div>
       ${c.partidos.map((m,i)=>{
@@ -1356,9 +1369,9 @@ function renderFixture(courts){
         const t2=state.teams.find(t=>t.id===m.t2);
         return `<div class="fixture-match">
           <span class="fixture-match-n">#${i+1}</span>
-          <span>${t1?t1.abbr:'?'}</span>
+          <span>${t1.abbr}</span>
           <span class="fixture-vs">vs</span>
-          <span>${t2?t2.abbr:'?'}</span>
+          <span>${t2.abbr}</span>
         </div>`;
       }).join('')}
     </div>`).join('');
