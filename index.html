@@ -336,6 +336,15 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .co-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:6px;}
 .co-stats{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);display:flex;gap:10px;}
 
+/* ── FIXTURE ── */
+.fixture-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+.fixture-court{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;}
+.fixture-court-num{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.fixture-match{padding:6px 0;border-bottom:1px solid rgba(30,45,69,.4);font-size:12px;display:flex;align-items:center;gap:6px;}
+.fixture-match:last-child{border-bottom:none;}
+.fixture-match-n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);width:18px;}
+.fixture-vs{color:var(--text-muted);font-size:10px;}
+
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 @media(max-width:700px){
   header{padding:0 11px;height:auto;padding-top:9px;padding-bottom:9px;flex-wrap:wrap;gap:7px;}
@@ -551,8 +560,31 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
         <button class="btn btn-secondary" onclick="autoMatch()">🔀 Auto</button>
       </div>
     </div>
+    <div class="card">
+      <div class="card-title">Generar Fixture por Canchas</div>
+      <div class="form-row">
+        <div class="form-group" style="max-width:100px;">
+          <label>Canchas</label>
+          <input type="number" id="inp-fixture-courts" min="1" value="2">
+        </div>
+        <div class="form-group" style="max-width:100px;">
+          <label>Partidos/Cancha</label>
+          <input type="number" id="inp-fixture-mpc" min="1" value="2">
+        </div>
+        <div class="form-group" style="max-width:160px;">
+          <label>Nombre ronda</label>
+          <input type="text" id="inp-fixture-round" placeholder="Ej: Ronda 1">
+        </div>
+        <button class="btn btn-primary" onclick="generateFixture()">🏸 Generar Fixture</button>
+      </div>
+    </div>
     <!-- Category tabs for matches -->
     <div class="cat-bar" id="matches-cat-bar"></div>
+    <!-- Fixture display -->
+    <div class="card" id="fixture-card" style="display:none;">
+      <div class="card-title">FIXTURE POR CANCHAS</div>
+      <div class="fixture-grid" id="fixture-grid"></div>
+    </div>
     <div class="card">
       <div class="card-title" id="matches-cat-title">Partidos</div>
       <div class="matches-list" id="matches-list"></div>
@@ -910,7 +942,7 @@ function showPage(id,event){
   document.getElementById('page-'+id).classList.add('active');
   if(event?.currentTarget?.classList?.contains('nav-btn'))event.currentTarget.classList.add('active');
   if(id==='teams'){renderCatBar('teams-cat-bar','teams');renderTeamCatSelect();renderTeams();}
-  if(id==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();}
+  if(id==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();const fc=document.getElementById('fixture-card');if(fc)fc.style.display='none';}
   if(id==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
   if(id==='categories'){renderCategories();}
   if(id==='profile')renderProfile();
@@ -1126,6 +1158,9 @@ function onMatchCatChange(){
   renderCatBar('matches-cat-bar','matches');
   fillTeamSelects(catId);
   renderMatches();
+  // Hide fixture when changing category
+  const fixCard=document.getElementById('fixture-card');
+  if(fixCard)fixCard.style.display='none';
   // Also sync the category tabs for teams and standings
   const cat=state.categories.find(c=>c.id===catId);
   if(cat){
@@ -1188,6 +1223,64 @@ async function autoMatch(){
   }
   if(!created)notify('No se generaron nuevos partidos',true);
   else notify(`${created} partido(s) generado(s) ✓`);
+}
+async function generateFixture(){
+  const cat=currentCat('matches');
+  if(!cat){notify('Seleccioná una categoría',true);return;}
+  const numCourts=parseInt(document.getElementById('inp-fixture-courts').value)||2;
+  const matchesPerCourt=parseInt(document.getElementById('inp-fixture-mpc').value)||2;
+  const roundName=document.getElementById('inp-fixture-round').value.trim()||'Ronda 1';
+  const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
+  if(active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
+  const sh=[...active].sort(()=>Math.random()-.5);
+  const totalMatches=Math.min(numCourts*matchesPerCourt,Math.floor(sh.length/2));
+  if(totalMatches<1){notify('No hay suficientes equipos',true);return;}
+  const courts=[];
+  for(let c=0;c<numCourts;c++){courts.push({numero:c+1,partidos:[]});}
+  let matchIdx=0;
+  for(let i=0;i<sh.length-1&&matchIdx<totalMatches;i+=2){
+    const courtIdx=Math.floor(matchIdx/matchesPerCourt);
+    if(courtIdx>=numCourts)break;
+    const t1=sh[i].id,t2=sh[i+1].id;
+    const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
+    if(ex){
+      courts[courtIdx].partidos.push(ex);
+    }else{
+      const newMatch={id:state.matchCounter++,t1:t1,t2:t2,categoryId:cat.id,round:roundName,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null};
+      state.matches.push(newMatch);
+      courts[courtIdx].partidos.push(newMatch);
+    }
+    matchIdx++;
+  }
+  await save();
+  renderFixture(courts);
+  renderMatches();
+  renderDashboard();
+  notify(`Fixture generado: ${totalMatches} partidos en ${numCourts} canchas ✓`);
+}
+function renderFixture(courts){
+  const grid=document.getElementById('fixture-grid');
+  const card=document.getElementById('fixture-card');
+  if(!grid||!card)return;
+  if(!courts||courts.length===0||courts.every(c=>c.partidos.length===0)){
+    card.style.display='none';
+    return;
+  }
+  card.style.display='block';
+  grid.innerHTML=courts.map(c=>`
+    <div class="fixture-court">
+      <div class="fixture-court-num">🏸 CANCHA ${c.numero}</div>
+      ${c.partidos.map((m,i)=>{
+        const t1=state.teams.find(t=>t.id===m.t1);
+        const t2=state.teams.find(t=>t.id===m.t2);
+        return `<div class="fixture-match">
+          <span class="fixture-match-n">#${i+1}</span>
+          <span>${t1?t1.abbr:'?'}</span>
+          <span class="fixture-vs">vs</span>
+          <span>${t2?t2.abbr:'?'}</span>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
 }
 async function addSet(mid){
   const m=state.matches.find(m=>m.id===mid);
