@@ -532,7 +532,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     </div>
   </div>
 
-  <!-- TEAMS -->
+  <!--Equipos-->
   <div class="page" id="page-teams">
     <div class="page-title">GESTIÓN DE <span>EQUIPOS</span></div>
     <div class="page-desc">// Equipos organizados por categoría</div>
@@ -1287,12 +1287,31 @@ async function autoMatch(){
   if(!cat){notify('Seleccioná una categoría',true);return;}
   const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
   if(active.length<2){notify('Se necesitan al menos 2 equipos en esta categoría',true);return;}
+  const roundName=document.getElementById('inp-round-auto').value.trim()||'Ronda 1';
   const sh=[...active].sort(()=>Math.random()-.5);
   let created=0;
   for(let i=0;i<sh.length-1;i+=2){
     const t1=sh[i].id,t2=sh[i+1].id;
     const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
-    if(!ex){await createMatch(t1,t2,cat.id,'Auto - Ronda '+(Math.floor(state.matchCounter/2)+1));created++;}
+    if(!ex){await createMatch(t1,t2,cat.id,roundName);created++;}
+  }
+  if(!created)notify('No se generaron nuevos partidos',true);
+  else notify(`${created} partido(s) generado(s) ✓`);
+}
+async function autoMatchRoundRobin(){
+  const cat=currentCat('matches');
+  if(!cat){notify('Seleccioná una categoría',true);return;}
+  const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
+  if(active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
+  const roundName=document.getElementById('inp-round-robin').value.trim()||'Ronda 1';
+  const sh=[...active];
+  let created=0;
+  for(let i=0;i<sh.length;i++){
+    for(let j=i+1;j<sh.length;j++){
+      const t1=sh[i].id,t2=sh[j].id;
+      const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
+      if(!ex){await createMatch(t1,t2,cat.id,roundName);created++;}
+    }
   }
   if(!created)notify('No se generaron nuevos partidos',true);
   else notify(`${created} partido(s) generado(s) ✓`);
@@ -1516,7 +1535,7 @@ function renderStandings(){
 }
 
 /* ════════════════════════════════════════════
-   DASHBOARD
+   Pantalla principal 
 ════════════════════════════════════════════ */
 function renderDashboard(){
   const sr=document.getElementById('stats-row');if(!sr)return;
@@ -1550,7 +1569,7 @@ function renderDashboard(){
     }).join('');
   }
 
-  // Recent results
+  // Logica resultados recientes 
   const rec=document.getElementById('dash-recent');
   const dm=state.matches.filter(m=>m.status==='done').slice(-5).reverse();
   rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin resultados aún</div>':
@@ -1569,7 +1588,7 @@ function renderDashboard(){
       </div>`;
     }).join('');
 
-  // Leaders per category
+  // Lideres por categoria
   const ld=document.getElementById('dash-leaders');
   if(!state.categories.length){ld.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías aún</div>';return;}
   ld.innerHTML=state.categories.map(c=>{
