@@ -1397,7 +1397,7 @@ function renderFixture(courts){
 }
 async function addSet(mid){
   const m=state.matches.find(m=>m.id===mid);
-  if(!m||m.sets.length>=4){notify('Máximo 4 sets',true);return;}
+  if(!m||m.sets.length>=3){notify('Máximo 3 sets (2-0 o 2-1)',true);return;}
   m.sets.push({s1:'',s2:''});await save();renderMatches();
 }
 async function removeSet(mid,idx){
@@ -1409,21 +1409,41 @@ async function updateScore(mid,si,side,val){
   const m=state.matches.find(m=>m.id===mid);if(!m)return;
   m.sets[si][side]=val===''?'':parseInt(val)||0;await save();
 }
+function validarResultado(sets){
+  if(!sets||sets.length<2)return{valido:false,ganador:null,resultado:'',error:'Mínimo 2 sets requeridos'};
+  if(sets.length>3)return{valido:false,ganador:null,resultado:'',error:'Máximo 3 sets permitidos'};
+  let winsA=0,winsB=0;
+  for(let i=0;i<sets.length;i++){
+    const s=sets[i];
+    const vA=(s.s1===''||s.s1===null)?0:parseInt(s.s1)||0;
+    const vB=(s.s2===''||s.s2===null)?0:parseInt(s.s2)||0;
+    if(vA===1&&vB===0){winsA++;continue;}
+    if(vA===0&&vB===1){winsB++;continue;}
+    if(vA>1||vB>1)return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: usar 1-0 o 0-1 (ganador del set)`};
+    return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: ambiguouso - usar 1-0 o 0-1`};
+  }
+  if(winsA===0&&winsB===0)return{valido:false,ganador:null,resultado:'',error:'Al menos un set debe tener ganador'};
+  if(winsA>=2)return{valido:true,ganador:'A',resultado:`${winsA}-${winsB}`,error:null};
+  if(winsB>=2)return{valido:true,ganador:'B',resultado:`${winsB}-${winsA}`,error:null};
+  if(sets.length===3&&winsA===1&&winsB===1)return{valido:true,ganador:null,resultado:'1-1',error:'Falta definir ganador (3er set)'};
+  return{valido:false,ganador:null,resultado:`${winsA}-${winsB}`,error:'Un equipo debe ganar 2 sets'};
+}
 async function saveMatch(mid){
   const m=state.matches.find(m=>m.id===mid);if(!m)return;
-  let w1=0,w2=0;
-  m.sets.forEach(s=>{
-    const v1=(s.s1===''||s.s1===null)?0:parseInt(s.s1)||0;
-    const v2=(s.s2===''||s.s2===null)?0:parseInt(s.s2)||0;
-    s.s1=v1;s.s2=v2;
-    if(v1>v2)w1++;else if(v2>v1)w2++;
-  });
-  if(w1===0&&w2===0){notify('Ingresá al menos un set con ganador',true);return;}
-  if(Math.abs(w1-w2)!==2){notify(`Resultado inválido (${w1}-${w2}). El ganador debe superar por exactamente 2 sets`,true);return;}
-  m.winner=w1>w2?m.t1:m.t2;m.status='done';
+  const result=validarResultado(m.sets);
+  if(!result.valido){notify(result.error||'Resultado inválido',true);return;}
+  if(!result.ganador){notify('Resultado incompleto',true);return;}
+  m.winner=result.ganador==='A'?m.t1:m.t2;
+  m.status='done';
   await save();renderMatches();renderDashboard();renderStandings();
   const winner=state.teams.find(t=>t.id===m.winner);
-  notify(`Guardado — ${winner.name} (${Math.max(w1,w2)}-${Math.min(w1,w2)}) ✓`);
+  notify(`Guardado — ${winner.name} (${result.resultado}) ✓`);
+}
+async function setWinner(mid,setIdx,ganador){
+  const m=state.matches.find(m=>m.id===mid);if(!m||m.status==='done')return;
+  if(ganador==='A'){m.sets[setIdx].s1=1;m.sets[setIdx].s2=0;}
+  else{m.sets[setIdx].s1=0;m.sets[setIdx].s2=1;}
+  await save();renderMatches();
 }
 async function deleteMatch(mid){
   openConfirm('Eliminar partido','¿Eliminar este partido?',async()=>{
@@ -1451,18 +1471,23 @@ function renderMatches(){
     const t2=state.teams.find(t=>t.id===m.t2);
     const done=m.status==='done';
     const t1w=m.winner===m.t1,t2w=m.winner===m.t2;
-    const sh=m.sets.map((s,i)=>`
+    const t1abbr=t1?t1.abbr.slice(0,3):'A';
+    const t2abbr=t2?t2.abbr.slice(0,3):'B';
+    const sh=m.sets.map((s,i)=>{
+      const vA=s.s1||0;
+      const vB=s.s2||0;
+      const winA=vA===1&&vB===0,winB=vA===0&&vB===1;
+      return `
       <div class="set-block">
         <div class="set-label">SET ${i+1}</div>
-        <div class="set-scores">
-          <input class="score-inp" type="number" min="0" max="99" value="${s.s1}" placeholder="0"
-            onchange="updateScore(${m.id},${i},'s1',this.value)" ${done?'disabled':''}>
-          <span class="score-sep">:</span>
-          <input class="score-inp" type="number" min="0" max="99" value="${s.s2}" placeholder="0"
-            onchange="updateScore(${m.id},${i},'s2',this.value)" ${done?'disabled':''}>
+        <div class="set-scores" style="gap:4px;">
+          ${done||winA?`<button class="btn btn-sm ${winA?'btn-success':'btn-secondary'}" disabled>${t1abbr} Gana</button>`:
+            `<button class="btn btn-sm btn-primary" onclick="setWinner(${m.id},${i},'A')">${t1abbr}</button>`}
+          ${done||winB?`<button class="btn btn-sm ${winB?'btn-success':'btn-secondary'}" disabled>${t2abbr} Gana</button>`:
+            `<button class="btn btn-sm btn-accent2" onclick="setWinner(${m.id},${i},'B')">${t2abbr}</button>`}
           ${!done&&m.sets.length>2?`<button class="rem-set-btn" onclick="removeSet(${m.id},${i})">−</button>`:''}
         </div>
-      </div>`).join('');
+      </div>`;}).join('');
     return `
       <div class="match-card ${done?'completed':''}">
         <div class="match-num">#${m.id}</div>
@@ -1475,7 +1500,7 @@ function renderMatches(){
           </div>
           <div class="match-sets">
             ${sh}
-            ${!done&&m.sets.length<4?`<button class="add-set-btn" onclick="addSet(${m.id})">＋</button>`:''}
+            ${!done&&m.sets.length<3?`<button class="add-set-btn" onclick="addSet(${m.id})" title="Agregar tercer set solo si hay empate 1-1">＋</button>`:''}
           </div>
         </div>
         <div class="match-actions">
