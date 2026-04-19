@@ -735,7 +735,7 @@ function catKey(age, gender) { return `${age}_${gender}`; }
 function catLabel(age, gender) { return `${age} ${GENDER_ICON[gender]} ${gender}`; }
 
 /* ════════════════════════════════════════════
-   STATE
+   Estado
 ════════════════════════════════════════════ */
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -744,9 +744,9 @@ const VALID_KEYS = ['NEWC-2025-TOUR-001','DEMO-DEMO-DEMO-000','NCMT-2025-PREM-99
 
 let currentUser       = null;
 let currentTournament = null;
-// state.categories = [{id, age, gender}]
-// state.teams      = [{id, name, abbr, categoryId, active}]
-// state.matches    = [{id, t1, t2, categoryId, round, sets, status, winner}]
+// state.categories = [{id, año, genero}]
+// state.teams      = [{id, nombre, abbr, categoryId, active}]
+// state.matches    = [{id, t1, t2, categoryId, ronda, sets, estado, ganador}]
 let state = { categories:[], teams:[], matches:[], matchCounter:1 };
 let currentFixtureCourts = [];
 
@@ -979,7 +979,7 @@ async function deleteTournament(id){
 }
 
 /* ════════════════════════════════════════════
-   SAVE
+   Guaradar cambios
 ════════════════════════════════════════════ */
 async function save(){
   if(!currentTournament)return;
@@ -995,7 +995,7 @@ async function save(){
 }
 
 /* ════════════════════════════════════════════
-   NAVIGATION
+   NAVEGACION
 ════════════════════════════════════════════ */
 function showPage(id,event){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1023,7 +1023,7 @@ function showPage(id,event){
 }
 
 /* ════════════════════════════════════════════
-   CATEGORIES
+   CATEGORIAS
 ════════════════════════════════════════════ */
 function selectAge(age,el){
   newCatAge=age;
@@ -1045,7 +1045,6 @@ async function addCategory(){
   }
   const cat={id:Date.now(),age:newCatAge,gender:newCatGender};
   state.categories.push(cat);
-  // Set this as active in all sections
   activeTab.teams=cat.id;
   activeTab.matches=cat.id;
   activeTab.standings=cat.id;
@@ -1055,7 +1054,7 @@ async function addCategory(){
   err.textContent='';
   await save();
   renderCategories();renderAll();
-  // Sync dropdowns
+  // Sincronizador 
   const teamSel=document.getElementById('inp-team-cat');
   if(teamSel)teamSel.value=cat.id;
   renderMatchSelects();
@@ -1105,7 +1104,6 @@ function renderCatBar(barId, section){
   const bar=document.getElementById(barId); if(!bar)return;
   if(!state.categories.length){bar.style.display='none';return;}
   bar.style.display='flex';
-  // Set default if needed
   if(!activeTab[section]||!state.categories.find(c=>c.id===activeTab[section])){
     activeTab[section]=state.categories[0]?.id||null;
   }
@@ -1132,11 +1130,9 @@ function currentCat(section){
   return state.categories.find(c=>c.id===activeTab[section])||state.categories[0]||null;
 }
 
-/* ── Populate team category select ── */
 function renderTeamCatSelect(){
   const sel=document.getElementById('inp-team-cat'); if(!sel)return;
   sel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
-  // Sync with active tab
   if(activeTab.teams)sel.value=activeTab.teams;
 }
 function onTeamCatChange(){
@@ -1152,7 +1148,7 @@ function onTeamCatChange(){
 }
 
 /* ════════════════════════════════════════════
-   TEAMS
+   Equipos
 ════════════════════════════════════════════ */
 async function addTeam(){
   const catId=parseInt(document.getElementById('inp-team-cat').value);
@@ -1166,7 +1162,7 @@ async function addTeam(){
   state.teams.push({id:Date.now(),name,abbr,categoryId:catId,active:true});
   document.getElementById('inp-team-name').value='';
   document.getElementById('inp-team-abbr').value='';
-  // Switch all tabs to this category
+
   activeTab.teams=catId;
   activeTab.matches=catId;
   activeTab.standings=catId;
@@ -1217,7 +1213,7 @@ function renderTeams(){
    MATCHES
 ════════════════════════════════════════════ */
 function renderMatchSelects(){
-  // Category select
+  // Categoria seleccionada 
   const catSel=document.getElementById('sel-match-cat'); if(!catSel)return;
   catSel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
   // Sync with active tab
@@ -1231,10 +1227,10 @@ function onMatchCatChange(){
   renderCatBar('matches-cat-bar','matches');
   fillTeamSelects(catId);
   renderMatches();
-  // Hide fixture when changing category
+
   const fixCard=document.getElementById('fixture-card');
   if(fixCard)fixCard.style.display='none';
-  // Also sync the category tabs for teams and standings
+
   const cat=state.categories.find(c=>c.id===catId);
   if(cat){
     const teamTab=document.getElementById('teams-cat-bar');
@@ -1513,7 +1509,7 @@ function renderMatches(){
 }
 
 /* ════════════════════════════════════════════
-   STANDINGS
+    POSICIONES
 ════════════════════════════════════════════ */
 function calcStandingsForCat(catId){
   const s={};
@@ -1630,12 +1626,12 @@ function renderDashboard(){
 }
 
 function goToCatSection(section, catId){
-  // Sync all tabs to the selected category
+
   activeTab.teams=catId;
   activeTab.matches=catId;
   activeTab.standings=catId;
   showPage(section,null);
-  // Activate correct nav button
+  
   const navBtns=document.querySelectorAll('.nav-btn');
   navBtns.forEach(b=>b.classList.remove('active'));
   const map={teams:2,matches:3,standings:4};
