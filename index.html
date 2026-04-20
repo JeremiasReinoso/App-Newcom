@@ -163,7 +163,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .new-tc:hover{border-color:var(--accent);background:rgba(0,212,255,.07);}
 .new-tc-lbl{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--accent);}
 
-/* ── CATEGORY TABS (inside pages) ── */
+/* ── CATEGORY TABS ── */
 .cat-bar{
   display:flex;gap:0;margin-bottom:22px;
   background:var(--surface);border:1px solid var(--border);border-radius:4px;
@@ -375,6 +375,36 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 }
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── RECURSOS ── */
+.resources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:20px;}
+.resource-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;transition:all .25s ease;position:relative;overflow:hidden;}
+.resource-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);transition:all .25s ease;}
+.resource-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 8px 24px rgba(0,212,255,.12);}
+.resource-card:hover::before{background:var(--accent);}
+.resource-card.featured{border-color:var(--accent);background:linear-gradient(135deg,rgba(0,212,255,.06) 0%,var(--surface) 100%);}
+.resource-card.featured::before{background:var(--accent);}
+.resource-card.featured:hover{box-shadow:0 12px 32px rgba(0,212,255,.2);}
+.resource-card.single{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:420px;margin:0 auto;}
+.resource-card.single .rc-icon{margin-bottom:16px;}
+.resource-card.single .rc-name{font-size:22px;}
+.resource-card.single .rc-desc{margin-bottom:18px;}
+.resource-card.single .rc-actions{justify-content:center;}
+.rc-icon{font-size:36px;margin-bottom:12px;display:block;}
+.rc-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text);margin-bottom:8px;line-height:1.2;}
+.rc-desc{font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;}
+.rc-tag{position:absolute;top:12px;right:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3);}
+.rc-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.rc-btn{flex:1;min-width:100px;padding:10px 16px;border-radius:3px;font-size:13px;font-weight:600;letter-spacing:1px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.rc-btn-view{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.rc-btn-view:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.08);}
+.rc-btn-download{background:var(--accent);color:#020509;border:none;}
+.rc-btn-download:hover{background:#00eeff;box-shadow:0 0 14px rgba(0,212,255,.4);}
+
+@media(min-width:600px){
+  .rc-btn{padding:12px 20px;font-size:14px;}
+}
+
 @media(max-width:700px){
   header{padding:0 11px;height:auto;padding-top:9px;padding-bottom:9px;flex-wrap:wrap;gap:7px;}
   .hdr-tournament{display:none;}.page{padding:16px 12px;}
@@ -468,6 +498,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       <button class="nav-btn" onclick="showPage('teams',event)">Equipos</button>
       <button class="nav-btn" onclick="showPage('matches',event)">Partidos</button>
       <button class="nav-btn" onclick="showPage('standings',event)">Posiciones</button>
+      <button class="nav-btn" onclick="showPage('resources',event)">Recursos</button>
     </nav>
     <div class="hdr-user">
       <div class="hdr-uname" id="hdr-uname"></div>
@@ -488,14 +519,13 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     <div class="page-title">PANEL <span>PRINCIPAL</span></div>
     <div class="page-desc" id="dash-desc">Resumen del torneo</div>
     <div class="stats-row" id="stats-row"></div>
-    <!-- Category overview cards -->
     <div class="card">
-      <div class="card-title">Categorías del Torneo</div>     
+      <div class="card-title">Categorías del Torneo</div>
       <div class="cat-overview" id="dash-cats"></div>
       <button class="btn btn-primary" onclick="showPage('categories')">Ver Categorías</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="card"><div class="card-title"> Resultados de Categoria</div><div id="dash-recent"></div></div>
+      <div class="card"><div class="card-title">Resultados de Categoría</div><div id="dash-recent"></div></div>
       <div class="card"><div class="card-title">Líderes por Posición</div><div id="dash-leaders"></div></div>
     </div>
   </div>
@@ -532,7 +562,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     </div>
   </div>
 
-  <!--Equipos-->
+  <!-- TEAMS -->
   <div class="page" id="page-teams">
     <div class="page-title">GESTIÓN DE <span>EQUIPOS</span></div>
     <div class="page-desc">// Equipos organizados por categoría</div>
@@ -554,7 +584,6 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
         <button class="btn btn-primary" onclick="addTeam()">＋ Agregar</button>
       </div>
     </div>
-    <!-- Category tabs for teams -->
     <div class="cat-bar" id="teams-cat-bar"></div>
     <div class="card">
       <div class="card-title" id="teams-cat-title">Equipos</div>
@@ -566,8 +595,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <div class="page" id="page-matches">
     <div class="page-title">PARTIDOS Y <span>RESULTADOS</span></div>
     <div class="page-desc">// Organizá los partidos en 3 pasos: emparejar → fixture → imprimir</div>
-    
-    <!-- Category tabs -->
+
     <div class="cat-bar no-print" id="matches-cat-bar"></div>
 
     <!-- SECCIÓN 1: EMPAREJAMIENTOS -->
@@ -579,13 +607,33 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
           <select id="sel-match-cat" onchange="onMatchCatChange()"></select>
         </div>
       </div>
-      
+
       <!-- Modo automático -->
       <div style="margin-bottom:16px;padding-top:12px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Modo automático</div>
-        <button class="btn btn-primary" onclick="autoMatch()">⚡ Generar Emparejamientos</button>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Modo automático — aleatorio (cada equipo juega 1 vez)</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="max-width:200px;">
+            <label>Nombre de ronda</label>
+            <!-- FIX: input con id correcto para autoMatch() -->
+            <input type="text" id="inp-round-auto" placeholder="Ej: Ronda 1">
+          </div>
+          <button class="btn btn-primary" onclick="autoMatch()">⚡ Generar (Aleatorio)</button>
+        </div>
       </div>
-      
+
+      <!-- Round Robin -->
+      <div style="margin-bottom:16px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Round Robin — todos contra todos</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="max-width:200px;">
+            <label>Nombre de ronda</label>
+            <!-- FIX: input con id correcto para autoMatchRoundRobin() -->
+            <input type="text" id="inp-round-robin" placeholder="Ej: Ronda 1">
+          </div>
+          <button class="btn btn-accent2" onclick="autoMatchRoundRobin()">🔄 Round Robin</button>
+        </div>
+      </div>
+
       <!-- Modo manual -->
       <div style="padding-top:12px;border-top:1px solid var(--border);">
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Modo manual</div>
@@ -634,7 +682,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
     </div>
 
     <!-- Fixture display -->
-    <div class="card print-only" id="fixture-card">
+    <div class="card print-only" id="fixture-card" style="display:none;">
       <div class="print-header">
         <h1>NEWCOM — Fixture</h1>
         <p id="print-tournament-name"></p>
@@ -654,7 +702,6 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
   <div class="page" id="page-standings">
     <div class="page-title">TABLA DE <span>POSICIONES</span></div>
     <div class="page-desc">Clasificación por categoría</div>
-    <!-- Category tabs for standings -->
     <div class="cat-bar" id="standings-cat-bar"></div>
     <div class="card">
       <div class="card-title" id="standings-cat-title">Posiciones</div>
@@ -680,6 +727,13 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       </div>
       <div class="card"><div class="card-title">Estadísticas Globales</div><div id="profile-stats"></div></div>
     </div>
+  </div>
+
+  <!-- RECURSOS -->
+  <div class="page" id="page-resources">
+    <div class="page-title">RECURSOS <span>OFICIALES</span></div>
+    <div class="page-desc">Documentos y archivos del torneo</div>
+    <div id="resources-container"></div>
   </div>
 </div>
 
@@ -712,7 +766,12 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
 
 <div id="notif"></div>
 
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — Todo el código va AQUÍ dentro
+     del tag <script> para que el navegador lo ejecute
+════════════════════════════════════════════ -->
 <script>
+
 /* ════════════════════════════════════════════
    ⚙️  CONFIGURACIÓN SUPABASE
    Reemplazá con los valores de tu proyecto en supabase.com
@@ -744,9 +803,6 @@ const VALID_KEYS = ['NEWC-2025-TOUR-001','DEMO-DEMO-DEMO-000','NCMT-2025-PREM-99
 
 let currentUser       = null;
 let currentTournament = null;
-// state.categories = [{id, año, genero}]
-// state.teams      = [{id, nombre, abbr, categoryId, active}]
-// state.matches    = [{id, t1, t2, categoryId, ronda, sets, estado, ganador}]
 let state = { categories:[], teams:[], matches:[], matchCounter:1 };
 let currentFixtureCourts = [];
 
@@ -759,6 +815,48 @@ let newCatGender = null;
 
 function isConfigured() {
   return !SUPABASE_URL.includes('TU_PROYECTO') && !SUPABASE_ANON_KEY.includes('TU_ANON_KEY');
+}
+
+/* ════════════════════════════════════════════
+   RECURSOS
+════════════════════════════════════════════ */
+const resources = [
+  {
+    name: "Reglamento Oficial",
+    file: "assets/Pdf/PDF_GO_Reglamento Newcom FEVA 2025-2027.pdf",
+    description: "Reglamento oficial de Newcom - FEVA 2025-2027. Contiene todas las normas y reglas del torneo.",
+    destacado: true
+  }
+];
+
+function renderResources(){
+  const container = document.getElementById('resources-container');
+  if(!container) return;
+  if(!resources.length){
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-msg">No hay recursos disponibles</div><div class="empty-sub">Agregá archivos en la configuración</div></div>';
+    return;
+  }
+  const isSingle = resources.length === 1;
+  container.innerHTML = '<div class="resources-grid">' + resources.map((r) => {
+    const isFeatured = r.destacado === true;
+    let cardClass = 'resource-card';
+    if(isFeatured) cardClass += ' featured';
+    if(isSingle) cardClass += ' single';
+    let tagHtml = '';
+    if(isFeatured){
+      tagHtml = isSingle
+        ? '<span class="rc-tag" style="position:relative;top:0;right:0;margin-bottom:12px;">Oficial</span>'
+        : '<span class="rc-tag">Oficial</span>';
+    }
+    return '<div class="' + cardClass + '">' + tagHtml +
+      '<span class="rc-icon">📄</span>' +
+      '<div class="rc-name">' + r.name + '</div>' +
+      '<div class="rc-desc">' + r.description + '</div>' +
+      '<div class="rc-actions">' +
+        '<a href="' + r.file + '" target="_blank" class="rc-btn rc-btn-view">👁 Ver</a>' +
+        '<a href="' + r.file + '" download class="rc-btn rc-btn-download">⬇ Descargar</a>' +
+      '</div></div>';
+  }).join('') + '</div>';
 }
 
 /* ════════════════════════════════════════════
@@ -781,31 +879,33 @@ async function boot() {
   else show('auth-screen');
 }
 
-function show(id){document.getElementById(id).classList.remove('hidden');}
-function hide(id){document.getElementById(id).classList.add('hidden');}
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
 function fadeOut(id,cb){
   const el=document.getElementById(id);
-  el.style.transition='opacity .4s';el.style.opacity='0';
-  setTimeout(()=>{hide(id);el.style.opacity='';el.style.transition='';cb&&cb();},420);
+  el.style.transition='opacity .4s'; el.style.opacity='0';
+  setTimeout(()=>{ hide(id); el.style.opacity=''; el.style.transition=''; cb&&cb(); },420);
 }
 
 /* ════════════════════════════════════════════
    LICENSE
 ════════════════════════════════════════════ */
-document.getElementById('lic-key').addEventListener('input',function(){
-  let v=this.value.replace(/[^A-Z0-9a-z]/g,'').toUpperCase();
-  let p=[];for(let i=0;i<v.length&&i<16;i+=4)p.push(v.slice(i,i+4));
-  this.value=p.join('-');
+document.getElementById('lic-key').addEventListener('input', function(){
+  let v = this.value.replace(/[^A-Z0-9a-z]/g,'').toUpperCase();
+  let p = [];
+  for(let i=0; i<v.length && i<16; i+=4) p.push(v.slice(i,i+4));
+  this.value = p.join('-');
 });
+
 function activateLicense(){
-  const checked=document.getElementById('lic-check').checked;
-  const key=document.getElementById('lic-key').value.trim().toUpperCase();
-  const err=document.getElementById('lic-err');
-  if(!checked){err.textContent='⚠ Debe aceptar los términos';return;}
-  if(!key){err.textContent='⚠ Ingrese la clave';return;}
-  if(!VALID_KEYS.includes(key)){err.textContent='✗ Clave inválida';return;}
+  const checked = document.getElementById('lic-check').checked;
+  const key = document.getElementById('lic-key').value.trim().toUpperCase();
+  const err = document.getElementById('lic-err');
+  if(!checked){ err.textContent='⚠ Debe aceptar los términos'; return; }
+  if(!key){ err.textContent='⚠ Ingrese la clave'; return; }
+  if(!VALID_KEYS.includes(key)){ err.textContent='✗ Clave inválida'; return; }
   localStorage.setItem('newcom_lic','1');
-  fadeOut('license-screen',()=>{
+  fadeOut('license-screen', ()=>{
     if(!isConfigured()){
       currentUser={id:'demo',email:'demo@newcom.local',user_metadata:{name:'Usuario Demo'},created_at:new Date().toISOString()};
       showApp();
@@ -817,46 +917,52 @@ function activateLicense(){
    AUTH
 ════════════════════════════════════════════ */
 function switchTab(tab){
-  document.getElementById('form-login').style.display=tab==='login'?'':'none';
-  document.getElementById('form-register').style.display=tab==='register'?'':'none';
-  document.getElementById('tab-login').classList.toggle('active',tab==='login');
-  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('form-login').style.display  = tab==='login'    ? '' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
 }
+
 async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-err'); err.textContent='';
-  if(!email||!pass){err.textContent='Completá todos los campos';return;}
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-err'); err.textContent='';
+  if(!email||!pass){ err.textContent='Completá todos los campos'; return; }
   const btn=document.getElementById('btn-login'); btn.disabled=true; btn.textContent='INGRESANDO...';
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
   btn.disabled=false; btn.textContent='INGRESAR';
-  if(error){err.textContent='✗ '+authErr(error.message);return;}
+  if(error){ err.textContent='✗ '+authErr(error.message); return; }
   currentUser=data.user; fadeOut('auth-screen',showApp);
 }
+
 async function doRegister(){
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  const err=document.getElementById('reg-err'); err.textContent='';
-  if(!name||!email||!pass){err.textContent='Completá todos los campos';return;}
-  if(pass.length<6){err.textContent='Contraseña mínimo 6 caracteres';return;}
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const err   = document.getElementById('reg-err'); err.textContent='';
+  if(!name||!email||!pass){ err.textContent='Completá todos los campos'; return; }
+  if(pass.length<6){ err.textContent='Contraseña mínimo 6 caracteres'; return; }
   const btn=document.getElementById('btn-register'); btn.disabled=true; btn.textContent='CREANDO...';
   const{data,error}=await db.auth.signUp({email,password:pass,options:{data:{name}}});
   btn.disabled=false; btn.textContent='CREAR CUENTA';
-  if(error){err.textContent='✗ '+authErr(error.message);return;}
-  if(data.user&&!data.session){err.style.color='var(--win)';err.textContent='✓ Revisá tu email para confirmar.';return;}
+  if(error){ err.textContent='✗ '+authErr(error.message); return; }
+  if(data.user&&!data.session){ err.style.color='var(--win)'; err.textContent='✓ Revisá tu email para confirmar.'; return; }
   currentUser=data.user; fadeOut('auth-screen',showApp);
 }
+
 async function doLogout(){
-  if(isConfigured())await db.auth.signOut();
-  currentUser=null;currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};
-  const app=document.getElementById('app');app.classList.remove('visible');app.style.display='none';
+  if(isConfigured()) await db.auth.signOut();
+  currentUser=null; currentTournament=null;
+  state={categories:[],teams:[],matches:[],matchCounter:1};
+  const app=document.getElementById('app');
+  app.classList.remove('visible'); app.style.display='none';
   show('auth-screen');
 }
+
 function authErr(m){
-  if(m.includes('Invalid login'))return 'Email o contraseña incorrectos';
-  if(m.includes('already registered'))return 'Email ya registrado';
-  if(m.includes('Password should'))return 'Contraseña mínimo 6 caracteres';
+  if(m.includes('Invalid login'))    return 'Email o contraseña incorrectos';
+  if(m.includes('already registered')) return 'Email ya registrado';
+  if(m.includes('Password should'))  return 'Contraseña mínimo 6 caracteres';
   return m;
 }
 
@@ -876,15 +982,19 @@ function showApp(){
 /* ════════════════════════════════════════════
    TOURNAMENTS
 ════════════════════════════════════════════ */
-function getTKey(){return 'newcom_t_'+currentUser.id;}
+function getTKey(){ return 'newcom_t_'+currentUser.id; }
+
 async function goToTournaments(){
-  currentTournament=null;state={categories:[],teams:[],matches:[],matchCounter:1};currentFixtureCourts=[];
+  currentTournament=null;
+  state={categories:[],teams:[],matches:[],matchCounter:1};
+  currentFixtureCourts=[];
   document.getElementById('hdr-tournament').style.display='none';
   document.getElementById('hdr-nav').style.display='none';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-tournaments').classList.add('active');
   await loadTournaments();
 }
+
 async function loadTournaments(){
   const grid=document.getElementById('tournaments-grid');
   grid.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:14px;">Cargando...</div>';
@@ -892,7 +1002,7 @@ async function loadTournaments(){
   if(isConfigured()){
     const{data}=await db.from('tournaments').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
     list=data||[];
-  }else{
+  } else {
     const raw=localStorage.getItem(getTKey());
     list=raw?JSON.parse(raw):[];
   }
@@ -902,11 +1012,11 @@ async function loadTournaments(){
     return;
   }
   list.forEach(t=>{
-    const cats=t.data?.categories||[];
-    const teams=(t.data?.teams?.filter(x=>x.active).length)||0;
-    const done=(t.data?.matches?.filter(x=>x.status==='done').length)||0;
-    const total=(t.data?.matches?.length)||0;
-    const date=new Date(t.created_at||Date.now()).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
+    const cats   = t.data?.categories||[];
+    const teams  = (t.data?.teams?.filter(x=>x.active).length)||0;
+    const done   = (t.data?.matches?.filter(x=>x.status==='done').length)||0;
+    const total  = (t.data?.matches?.length)||0;
+    const date   = new Date(t.created_at||Date.now()).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
     const catPills=cats.map(c=>`<span class="cat-pill cat-pill-${GENDER_CLASS[c.gender]}">${c.age} ${GENDER_ICON[c.gender]}</span>`).join('');
     const tJson=JSON.stringify(t).replace(/"/g,'&quot;');
     grid.innerHTML+=`
@@ -919,6 +1029,7 @@ async function loadTournaments(){
       </div>`;
   });
 }
+
 function openNewTournamentModal(){
   document.getElementById('inp-tname').value='';
   document.getElementById('inp-tclub').value='';
@@ -927,38 +1038,43 @@ function openNewTournamentModal(){
   openModal('modal-new-tournament');
   setTimeout(()=>document.getElementById('inp-tname').focus(),100);
 }
+
 async function confirmNewTournament(){
-  const name=document.getElementById('inp-tname').value.trim();
-  const club=document.getElementById('inp-tclub').value.trim();
-  const courts=parseInt(document.getElementById('inp-courts').value)||1;
-  const err=document.getElementById('tournament-err');
-  if(!name){err.textContent='Ingresá el nombre';return;}
-  const t={id:Date.now().toString(),name,club,courts,user_id:currentUser.id,
+  const name   = document.getElementById('inp-tname').value.trim();
+  const club   = document.getElementById('inp-tclub').value.trim();
+  const courts = parseInt(document.getElementById('inp-courts').value)||1;
+  const err    = document.getElementById('tournament-err');
+  if(!name){ err.textContent='Ingresá el nombre'; return; }
+  const t={
+    id:Date.now().toString(), name, club, courts,
+    user_id:currentUser.id,
     created_at:new Date().toISOString(),
-    data:{categories:[],teams:[],matches:[],matchCounter:1}};
+    data:{categories:[],teams:[],matches:[],matchCounter:1}
+  };
   if(isConfigured()){
     const{error}=await db.from('tournaments').insert([{id:t.id,name,club,courts,user_id:t.user_id,created_at:t.created_at,data:t.data}]);
-    if(error){err.textContent='Error: '+error.message;return;}
-  }else{
-    const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
-    list.unshift(t);localStorage.setItem(getTKey(),JSON.stringify(list));
+    if(error){ err.textContent='Error: '+error.message; return; }
+  } else {
+    const raw=localStorage.getItem(getTKey()); const list=raw?JSON.parse(raw):[];
+    list.unshift(t); localStorage.setItem(getTKey(),JSON.stringify(list));
   }
   closeModal('modal-new-tournament');
   notify('Torneo "'+name+'" creado ✓');
   selectTournamentObj(t);
 }
-function selectTournament(el){ try{selectTournamentObj(JSON.parse(el.dataset.t));}catch(e){} }
+
+function selectTournament(el){ try{ selectTournamentObj(JSON.parse(el.dataset.t)); }catch(e){} }
+
 function selectTournamentObj(t){
   currentTournament=t;
   currentFixtureCourts=[];
   state=t.data||{categories:[],teams:[],matches:[],matchCounter:1};
-  if(!state.categories)state.categories=[];
-  if(!state.matchCounter)state.matchCounter=1;
-  // Set default active tabs
+  if(!state.categories)  state.categories=[];
+  if(!state.matchCounter) state.matchCounter=1;
   const firstCat=state.categories[0];
-  activeTab.teams=firstCat?firstCat.id:null;
-  activeTab.matches=firstCat?firstCat.id:null;
-  activeTab.standings=firstCat?firstCat.id:null;
+  activeTab.teams    = firstCat ? firstCat.id : null;
+  activeTab.matches  = firstCat ? firstCat.id : null;
+  activeTab.standings= firstCat ? firstCat.id : null;
   document.getElementById('hdr-tname').textContent=t.name;
   document.getElementById('hdr-tournament').style.display='flex';
   document.getElementById('hdr-nav').style.display='flex';
@@ -967,122 +1083,128 @@ function selectTournamentObj(t){
   document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderAll();
 }
+
 async function deleteTournament(id){
-  openConfirm('Eliminar torneo','¿Eliminar este torneo y todos sus datos?',async()=>{
-    if(isConfigured()){await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id);}
-    else{
-      const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
+  openConfirm('Eliminar torneo','¿Eliminar este torneo y todos sus datos?', async()=>{
+    if(isConfigured()){ await db.from('tournaments').delete().eq('id',id).eq('user_id',currentUser.id); }
+    else {
+      const raw=localStorage.getItem(getTKey()); const list=raw?JSON.parse(raw):[];
       localStorage.setItem(getTKey(),JSON.stringify(list.filter(t=>t.id!==id)));
     }
-    notify('Torneo eliminado');loadTournaments();
+    notify('Torneo eliminado'); loadTournaments();
   });
 }
 
 /* ════════════════════════════════════════════
-   Guaradar cambios
+   GUARDAR CAMBIOS
 ════════════════════════════════════════════ */
 async function save(){
-  if(!currentTournament)return;
+  if(!currentTournament) return;
   currentTournament.data=state;
   if(isConfigured()){
     await db.from('tournaments').update({data:state}).eq('id',currentTournament.id);
-  }else{
-    const raw=localStorage.getItem(getTKey());const list=raw?JSON.parse(raw):[];
+  } else {
+    const raw=localStorage.getItem(getTKey()); const list=raw?JSON.parse(raw):[];
     const idx=list.findIndex(t=>t.id===currentTournament.id);
-    if(idx>=0)list[idx].data=state;else list.unshift(currentTournament);
+    if(idx>=0) list[idx].data=state; else list.unshift(currentTournament);
     localStorage.setItem(getTKey(),JSON.stringify(list));
   }
 }
 
 /* ════════════════════════════════════════════
-   NAVEGACION
+   NAVEGACIÓN
 ════════════════════════════════════════════ */
-function showPage(id,event){
+function showPage(id, event){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  if(event?.currentTarget?.classList?.contains('nav-btn'))event.currentTarget.classList.add('active');
-  if(id==='teams'){renderCatBar('teams-cat-bar','teams');renderTeamCatSelect();renderTeams();}
+  if(event?.currentTarget?.classList?.contains('nav-btn')) event.currentTarget.classList.add('active');
+  if(id==='teams'){    renderCatBar('teams-cat-bar','teams'); renderTeamCatSelect(); renderTeams(); }
   if(id==='matches'){
     renderCatBar('matches-cat-bar','matches');
     renderMatchSelects();
     renderMatches();
-    const fc=document.getElementById('fixture-card');
-    const ps=document.getElementById('print-section');
     if(currentFixtureCourts.length>0){
       renderFixture(currentFixtureCourts);
-    }else{
-      if(fc)fc.style.display='none';
-      if(ps)ps.style.display='none';
+    } else {
+      const fc=document.getElementById('fixture-card');
+      const ps=document.getElementById('print-section');
+      if(fc) fc.style.display='none';
+      if(ps) ps.style.display='none';
     }
   }
-  if(id==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
-  if(id==='categories'){renderCategories();}
-  if(id==='profile')renderProfile();
-  if(id==='dashboard')renderDashboard();
+  if(id==='standings'){ renderCatBar('standings-cat-bar','standings'); renderStandings(); }
+  if(id==='categories'){ renderCategories(); }
+  if(id==='resources'){ renderResources(); }
+  if(id==='profile')   renderProfile();
+  if(id==='dashboard') renderDashboard();
 }
 
 /* ════════════════════════════════════════════
-   CATEGORIAS
+   CATEGORÍAS
 ════════════════════════════════════════════ */
-function selectAge(age,el){
+function selectAge(age, el){
   newCatAge=age;
   document.querySelectorAll('.age-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');
 }
-function selectGender(gender,el){
+
+function selectGender(gender, el){
   newCatGender=gender;
   document.querySelectorAll('.gender-opt').forEach(o=>o.className='gender-opt');
   el.classList.add('sel-'+GENDER_CLASS[gender]);
 }
+
 async function addCategory(){
   const err=document.getElementById('cat-err');
-  if(!newCatAge){err.textContent='Seleccioná la franja etaria';return;}
-  if(!newCatGender){err.textContent='Seleccioná el género';return;}
+  if(!newCatAge){   err.textContent='Seleccioná la franja etaria'; return; }
+  if(!newCatGender){ err.textContent='Seleccioná el género'; return; }
   const key=catKey(newCatAge,newCatGender);
   if(state.categories.find(c=>catKey(c.age,c.gender)===key)){
-    err.textContent='Esta categoría ya existe';return;
+    err.textContent='Esta categoría ya existe'; return;
   }
-  const cat={id:Date.now(),age:newCatAge,gender:newCatGender};
+  const cat={id:Date.now(), age:newCatAge, gender:newCatGender};
   state.categories.push(cat);
-  activeTab.teams=cat.id;
-  activeTab.matches=cat.id;
-  activeTab.standings=cat.id;
-  newCatAge=null;newCatGender=null;
+  activeTab.teams    = cat.id;
+  activeTab.matches  = cat.id;
+  activeTab.standings= cat.id;
+  newCatAge=null; newCatGender=null;
   document.querySelectorAll('.age-opt').forEach(o=>o.classList.remove('sel'));
   document.querySelectorAll('.gender-opt').forEach(o=>o.className='gender-opt');
   err.textContent='';
   await save();
-  renderCategories();renderAll();
-  // Sincronizador 
+  renderCategories(); renderAll();
   const teamSel=document.getElementById('inp-team-cat');
-  if(teamSel)teamSel.value=cat.id;
+  if(teamSel) teamSel.value=cat.id;
   renderMatchSelects();
   notify(`Categoría ${cat.age} ${cat.gender} agregada ✓`);
 }
+
 async function removeCategory(id){
   const cat=state.categories.find(c=>c.id===id);
-  const teamsInCat=state.teams.filter(t=>t.categoryId===id).length;
-  const matchesInCat=state.matches.filter(m=>m.categoryId===id).length;
+  const teamsInCat  = state.teams.filter(t=>t.categoryId===id).length;
+  const matchesInCat= state.matches.filter(m=>m.categoryId===id).length;
   let warn=`¿Eliminar la categoría <strong>${cat.age} ${cat.gender}</strong>?`;
-  if(teamsInCat||matchesInCat)warn+=`<br><br><span style="color:var(--danger);font-size:11px;">⚠ Se eliminarán ${teamsInCat} equipo(s) y ${matchesInCat} partido(s) de esta categoría.</span>`;
-  openConfirm('Eliminar Categoría',warn,async()=>{
-    state.categories=state.categories.filter(c=>c.id!==id);
-    state.teams=state.teams.filter(t=>t.categoryId!==id);
-    state.matches=state.matches.filter(m=>m.categoryId!==id);
-    await save();renderCategories();renderAll();
+  if(teamsInCat||matchesInCat)
+    warn+=`<br><br><span style="color:var(--danger);font-size:11px;">⚠ Se eliminarán ${teamsInCat} equipo(s) y ${matchesInCat} partido(s) de esta categoría.</span>`;
+  openConfirm('Eliminar Categoría', warn, async()=>{
+    state.categories = state.categories.filter(c=>c.id!==id);
+    state.teams      = state.teams.filter(t=>t.categoryId!==id);
+    state.matches    = state.matches.filter(m=>m.categoryId!==id);
+    await save(); renderCategories(); renderAll();
     notify('Categoría eliminada');
   });
 }
+
 function renderCategories(){
-  const list=document.getElementById('cat-list'); if(!list)return;
+  const list=document.getElementById('cat-list'); if(!list) return;
   if(!state.categories.length){
     list.innerHTML=`<div class="empty-state"><div class="empty-icon">🗂</div><div class="empty-msg">Sin categorías creadas</div><div class="empty-sub">Seleccioná edad y género arriba</div></div>`;
     return;
   }
   list.innerHTML=state.categories.map(c=>{
-    const teams=state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
-    const matches=state.matches.filter(m=>m.categoryId===c.id).length;
+    const teams   = state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
+    const matches = state.matches.filter(m=>m.categoryId===c.id).length;
     const gc=GENDER_CLASS[c.gender];
     return `
       <div class="cat-item">
@@ -1101,8 +1223,8 @@ function renderCategories(){
 
 /* ── Category bar (tabs) ── */
 function renderCatBar(barId, section){
-  const bar=document.getElementById(barId); if(!bar)return;
-  if(!state.categories.length){bar.style.display='none';return;}
+  const bar=document.getElementById(barId); if(!bar) return;
+  if(!state.categories.length){ bar.style.display='none'; return; }
   bar.style.display='flex';
   if(!activeTab[section]||!state.categories.find(c=>c.id===activeTab[section])){
     activeTab[section]=state.categories[0]?.id||null;
@@ -1115,31 +1237,34 @@ function renderCatBar(barId, section){
     </button>`;
   }).join('');
 }
-function switchCatTab(section,catId){
+
+function switchCatTab(section, catId){
   activeTab[section]=catId;
   if(section==='teams'){
     renderCatBar('teams-cat-bar','teams');
     const sel=document.getElementById('inp-team-cat');
-    if(sel)sel.value=catId;
+    if(sel) sel.value=catId;
     renderTeams();
   }
-  if(section==='matches'){renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();}
-  if(section==='standings'){renderCatBar('standings-cat-bar','standings');renderStandings();}
+  if(section==='matches'){ renderCatBar('matches-cat-bar','matches'); renderMatchSelects(); renderMatches(); }
+  if(section==='standings'){ renderCatBar('standings-cat-bar','standings'); renderStandings(); }
 }
+
 function currentCat(section){
   return state.categories.find(c=>c.id===activeTab[section])||state.categories[0]||null;
 }
 
 function renderTeamCatSelect(){
-  const sel=document.getElementById('inp-team-cat'); if(!sel)return;
+  const sel=document.getElementById('inp-team-cat'); if(!sel) return;
   sel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
-  if(activeTab.teams)sel.value=activeTab.teams;
+  if(activeTab.teams) sel.value=activeTab.teams;
 }
+
 function onTeamCatChange(){
   const catId=parseInt(document.getElementById('inp-team-cat').value);
-  activeTab.teams=catId;
-  activeTab.matches=catId;
-  activeTab.standings=catId;
+  activeTab.teams    = catId;
+  activeTab.matches  = catId;
+  activeTab.standings= catId;
   renderCatBar('teams-cat-bar','teams');
   renderCatBar('matches-cat-bar','matches');
   renderCatBar('standings-cat-bar','standings');
@@ -1148,52 +1273,56 @@ function onTeamCatChange(){
 }
 
 /* ════════════════════════════════════════════
-   Equipos
+   EQUIPOS
 ════════════════════════════════════════════ */
 async function addTeam(){
-  const catId=parseInt(document.getElementById('inp-team-cat').value);
-  const name=document.getElementById('inp-team-name').value.trim();
-  const abbr=document.getElementById('inp-team-abbr').value.trim().toUpperCase()||name.slice(0,3).toUpperCase();
-  if(!state.categories.length){notify('Primero creá una categoría',true);return;}
-  if(!name){notify('Ingresá el nombre del equipo',true);return;}
+  const catId = parseInt(document.getElementById('inp-team-cat').value);
+  const name  = document.getElementById('inp-team-name').value.trim();
+  const abbr  = document.getElementById('inp-team-abbr').value.trim().toUpperCase() || name.slice(0,3).toUpperCase();
+  if(!state.categories.length){ notify('Primero creá una categoría',true); return; }
+  if(!name){ notify('Ingresá el nombre del equipo',true); return; }
   if(state.teams.find(t=>t.name.toLowerCase()===name.toLowerCase()&&t.categoryId===catId)){
-    notify('Ya existe ese equipo en esta categoría',true);return;
+    notify('Ya existe ese equipo en esta categoría',true); return;
   }
-  state.teams.push({id:Date.now(),name,abbr,categoryId:catId,active:true});
+  state.teams.push({id:Date.now(), name, abbr, categoryId:catId, active:true});
   document.getElementById('inp-team-name').value='';
   document.getElementById('inp-team-abbr').value='';
-
-  activeTab.teams=catId;
-  activeTab.matches=catId;
-  activeTab.standings=catId;
+  activeTab.teams    = catId;
+  activeTab.matches  = catId;
+  activeTab.standings= catId;
   await save();
   renderCatBar('teams-cat-bar','teams');
   renderCatBar('matches-cat-bar','matches');
   renderCatBar('standings-cat-bar','standings');
   const teamSel=document.getElementById('inp-team-cat');
-  if(teamSel)teamSel.value=catId;
+  if(teamSel) teamSel.value=catId;
   renderMatchSelects();
-  renderTeams();renderMatches();renderStandings();renderDashboard();
+  renderTeams(); renderMatches(); renderStandings(); renderDashboard();
   notify(`Equipo "${name}" agregado ✓`);
 }
+
 function removeTeam(id){
   const t=state.teams.find(t=>t.id===id);
-  openConfirm('Retirar equipo',`¿Retirás al equipo <strong>${t.name}</strong>?`,async()=>{
-    t.active=false;await save();renderTeams();renderDashboard();notify(`"${t.name}" retirado`);
+  openConfirm('Retirar equipo', `¿Retirás al equipo <strong>${t.name}</strong>?`, async()=>{
+    t.active=false; await save(); renderTeams(); renderDashboard(); notify(`"${t.name}" retirado`);
   });
 }
+
 function renderTeams(){
   const g=document.getElementById('teams-grid');
   const titleEl=document.getElementById('teams-cat-title');
-  if(!g)return;
+  if(!g) return;
   const cat=currentCat('teams');
   if(!cat){
     g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🗂</div><div class="empty-msg">No hay categorías</div><div class="empty-sub">Creá una en la sección Categorías</div></div>`;
-    if(titleEl)titleEl.innerHTML='Equipos';
+    if(titleEl) titleEl.innerHTML='Equipos';
     return;
   }
-  if(titleEl)titleEl.innerHTML=`Equipos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
-  const all=[...state.teams.filter(t=>t.categoryId===cat.id&&t.active),...state.teams.filter(t=>t.categoryId===cat.id&&!t.active)];
+  if(titleEl) titleEl.innerHTML=`Equipos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  const all=[
+    ...state.teams.filter(t=>t.categoryId===cat.id&&t.active),
+    ...state.teams.filter(t=>t.categoryId===cat.id&&!t.active)
+  ];
   if(!all.length){
     g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏐</div><div class="empty-msg">Sin equipos en esta categoría</div><div class="empty-sub">Agregá equipos usando el formulario arriba</div></div>`;
     return;
@@ -1213,128 +1342,127 @@ function renderTeams(){
    MATCHES
 ════════════════════════════════════════════ */
 function renderMatchSelects(){
-  // Categoria seleccionada 
-  const catSel=document.getElementById('sel-match-cat'); if(!catSel)return;
+  const catSel=document.getElementById('sel-match-cat'); if(!catSel) return;
   catSel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
-  // Sync with active tab
   const cat=currentCat('matches');
-  if(cat)catSel.value=cat.id;
+  if(cat) catSel.value=cat.id;
   fillTeamSelects(cat?.id);
 }
+
 function onMatchCatChange(){
   const catId=parseInt(document.getElementById('sel-match-cat').value);
   activeTab.matches=catId;
   renderCatBar('matches-cat-bar','matches');
   fillTeamSelects(catId);
   renderMatches();
-
   const fixCard=document.getElementById('fixture-card');
-  if(fixCard)fixCard.style.display='none';
-
+  if(fixCard) fixCard.style.display='none';
   const cat=state.categories.find(c=>c.id===catId);
   if(cat){
-    const teamTab=document.getElementById('teams-cat-bar');
-    if(teamTab){
-      activeTab.teams=catId;
-      renderCatBar('teams-cat-bar','teams');
-      const teamSel=document.getElementById('inp-team-cat');
-      if(teamSel)teamSel.value=catId;
-    }
-    const standTab=document.getElementById('standings-cat-bar');
-    if(standTab){
-      activeTab.standings=catId;
-      renderCatBar('standings-cat-bar','standings');
-    }
+    activeTab.teams    = catId;
+    activeTab.standings= catId;
+    renderCatBar('teams-cat-bar','teams');
+    const teamSel=document.getElementById('inp-team-cat');
+    if(teamSel) teamSel.value=catId;
+    renderCatBar('standings-cat-bar','standings');
   }
 }
+
 function fillTeamSelects(catId){
-  const active=catId?state.teams.filter(t=>t.categoryId===catId&&t.active):[];
+  const active=catId ? state.teams.filter(t=>t.categoryId===catId&&t.active) : [];
   ['sel-team1','sel-team2'].forEach(sid=>{
-    const s=document.getElementById(sid);if(!s)return;
+    const s=document.getElementById(sid); if(!s) return;
     s.innerHTML='<option value="">— seleccionar —</option>'+active.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
   });
 }
-async function createMatch(t1id,t2id,catId,round){
-  const cid=catId||parseInt(document.getElementById('sel-match-cat')?.value);
-  const id1=t1id||parseInt(document.getElementById('sel-team1').value);
-  const id2=t2id||parseInt(document.getElementById('sel-team2').value);
-  const rnd=round||document.getElementById('inp-round').value.trim()||'Fase de grupos';
-  if(!cid){notify('Seleccioná una categoría',true);return;}
-  if(!id1||!id2){notify('Seleccioná ambos equipos',true);return;}
-  if(id1===id2){notify('No podés emparejar un equipo consigo mismo',true);return;}
-  // Validate same category
+
+async function createMatch(t1id, t2id, catId, round){
+  const cid  = catId  || parseInt(document.getElementById('sel-match-cat')?.value);
+  const id1  = t1id   || parseInt(document.getElementById('sel-team1').value);
+  const id2  = t2id   || parseInt(document.getElementById('sel-team2').value);
+  const rnd  = round  || document.getElementById('inp-round').value.trim() || 'Fase de grupos';
+  if(!cid){ notify('Seleccioná una categoría',true); return; }
+  if(!id1||!id2){ notify('Seleccioná ambos equipos',true); return; }
+  if(id1===id2){ notify('No podés emparejar un equipo consigo mismo',true); return; }
   const t1=state.teams.find(t=>t.id===id1);
   const t2=state.teams.find(t=>t.id===id2);
-  if(t1.categoryId!==cid||t2.categoryId!==cid){notify('Los equipos deben ser de la misma categoría',true);return;}
+  if(t1.categoryId!==cid||t2.categoryId!==cid){ notify('Los equipos deben ser de la misma categoría',true); return; }
   const ex=state.matches.find(m=>m.categoryId===cid&&m.status==='pending'&&((m.t1===id1&&m.t2===id2)||(m.t1===id2&&m.t2===id1)));
-  if(ex){notify('Ya existe ese partido pendiente',true);return;}
-  state.matches.push({id:state.matchCounter++,t1:id1,t2:id2,categoryId:cid,round:rnd,
-    sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null});
+  if(ex){ notify('Ya existe ese partido pendiente',true); return; }
+  state.matches.push({
+    id:state.matchCounter++, t1:id1, t2:id2, categoryId:cid, round:rnd,
+    sets:[{s1:'',s2:''},{s1:'',s2:''}], status:'pending', winner:null
+  });
   if(!t1id){
     document.getElementById('sel-team1').value='';
     document.getElementById('sel-team2').value='';
     document.getElementById('inp-round').value='';
   }
-  await save();renderMatches();renderDashboard();
+  await save(); renderMatches(); renderDashboard();
   notify('Partido creado ✓');
 }
+
 async function autoMatch(){
   const cat=currentCat('matches');
-  if(!cat){notify('Seleccioná una categoría',true);return;}
+  if(!cat){ notify('Seleccioná una categoría',true); return; }
   const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
-  if(active.length<2){notify('Se necesitan al menos 2 equipos en esta categoría',true);return;}
-  const roundName=document.getElementById('inp-round-auto').value.trim()||'Ronda 1';
+  if(active.length<2){ notify('Se necesitan al menos 2 equipos en esta categoría',true); return; }
+  // FIX: usar el id correcto del input
+  const roundName = document.getElementById('inp-round-auto')?.value.trim() || 'Ronda 1';
   const sh=[...active].sort(()=>Math.random()-.5);
   let created=0;
-  for(let i=0;i<sh.length-1;i+=2){
-    const t1=sh[i].id,t2=sh[i+1].id;
+  for(let i=0; i<sh.length-1; i+=2){
+    const t1=sh[i].id, t2=sh[i+1].id;
     const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
-    if(!ex){await createMatch(t1,t2,cat.id,roundName);created++;}
+    if(!ex){ await createMatch(t1,t2,cat.id,roundName); created++; }
   }
-  if(!created)notify('No se generaron nuevos partidos',true);
+  if(!created) notify('No se generaron nuevos partidos',true);
   else notify(`${created} partido(s) generado(s) ✓`);
 }
+
 async function autoMatchRoundRobin(){
   const cat=currentCat('matches');
-  if(!cat){notify('Seleccioná una categoría',true);return;}
+  if(!cat){ notify('Seleccioná una categoría',true); return; }
   const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
-  if(active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
-  const roundName=document.getElementById('inp-round-robin').value.trim()||'Ronda 1';
+  if(active.length<2){ notify('Se necesitan al menos 2 equipos',true); return; }
+  // FIX: usar el id correcto del input
+  const roundName = document.getElementById('inp-round-robin')?.value.trim() || 'Ronda 1';
   const sh=[...active];
   let created=0;
-  for(let i=0;i<sh.length;i++){
-    for(let j=i+1;j<sh.length;j++){
-      const t1=sh[i].id,t2=sh[j].id;
+  for(let i=0; i<sh.length; i++){
+    for(let j=i+1; j<sh.length; j++){
+      const t1=sh[i].id, t2=sh[j].id;
       const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
-      if(!ex){await createMatch(t1,t2,cat.id,roundName);created++;}
+      if(!ex){ await createMatch(t1,t2,cat.id,roundName); created++; }
     }
   }
-  if(!created)notify('No se generaron nuevos partidos',true);
+  if(!created) notify('No se generaron nuevos partidos',true);
   else notify(`${created} partido(s) generado(s) ✓`);
 }
+
 async function generateFixture(){
   const cat=currentCat('matches');
-  if(!cat){notify('Seleccioná una categoría',true);return;}
-  const numCourts=parseInt(document.getElementById('inp-fixture-courts').value)||2;
-  const matchesPerCourt=parseInt(document.getElementById('inp-fixture-mpc').value)||2;
-  const roundName=document.getElementById('inp-fixture-round').value.trim()||'Ronda 1';
+  if(!cat){ notify('Seleccioná una categoría',true); return; }
+  const numCourts      = parseInt(document.getElementById('inp-fixture-courts').value)||2;
+  const matchesPerCourt= parseInt(document.getElementById('inp-fixture-mpc').value)||2;
+  const roundName      = document.getElementById('inp-fixture-round').value.trim()||'Ronda 1';
   const active=state.teams.filter(t=>t.categoryId===cat.id&&t.active);
-  if(active.length<2){notify('Se necesitan al menos 2 equipos',true);return;}
+  if(active.length<2){ notify('Se necesitan al menos 2 equipos',true); return; }
   const sh=[...active].sort(()=>Math.random()-.5);
-  const totalMatches=Math.min(numCourts*matchesPerCourt,Math.floor(sh.length/2));
-  if(totalMatches<1){notify('No hay suficientes equipos',true);return;}
+  const totalMatches=Math.min(numCourts*matchesPerCourt, Math.floor(sh.length/2));
+  if(totalMatches<1){ notify('No hay suficientes equipos',true); return; }
   const courts=[];
-  for(let c=0;c<numCourts;c++){courts.push({numero:c+1,partidos:[]});}
+  for(let c=0; c<numCourts; c++) courts.push({numero:c+1, partidos:[]});
   let matchIdx=0;
-  for(let i=0;i<sh.length-1&&matchIdx<totalMatches;i+=2){
+  for(let i=0; i<sh.length-1&&matchIdx<totalMatches; i+=2){
     const courtIdx=Math.floor(matchIdx/matchesPerCourt);
-    if(courtIdx>=numCourts)break;
-    const t1=sh[i].id,t2=sh[i+1].id;
+    if(courtIdx>=numCourts) break;
+    const t1=sh[i].id, t2=sh[i+1].id;
     const ex=state.matches.find(m=>m.categoryId===cat.id&&m.status==='pending'&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)));
     if(ex){
       courts[courtIdx].partidos.push(ex);
-    }else{
-      const newMatch={id:state.matchCounter++,t1:t1,t2:t2,categoryId:cat.id,round:roundName,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null};
+    } else {
+      const newMatch={id:state.matchCounter++,t1,t2,categoryId:cat.id,round:roundName,sets:[{s1:'',s2:''},{s1:'',s2:''}],status:'pending',winner:null};
       state.matches.push(newMatch);
       courts[courtIdx].partidos.push(newMatch);
     }
@@ -1346,36 +1474,36 @@ async function generateFixture(){
   renderDashboard();
   notify(`Fixture generado: ${totalMatches} partidos en ${numCourts} canchas ✓`);
 }
-function printFixture(){
-  window.print();
-}
+
+function printFixture(){ window.print(); }
+
 function renderFixture(courts){
   const grid=document.getElementById('fixture-grid');
   const card=document.getElementById('fixture-card');
-  const printSec = document.getElementById('print-section');
-  if(!grid||!card)return;
+  const printSec=document.getElementById('print-section');
+  if(!grid||!card) return;
   if(!courts||courts.length===0||courts.every(c=>c.partidos.length===0)){
     card.style.display='none';
-    if(printSec)printSec.style.display='none';
+    if(printSec) printSec.style.display='none';
     return;
   }
-  const validCourts = courts.map(c => ({
+  const validCourts=courts.map(c=>({
     numero: c.numero,
-    partidos: c.partidos.filter(m => {
-      const t1 = state.teams.find(t => t.id === m.t1);
-      const t2 = state.teams.find(t => t.id === m.t2);
-      return t1 && t2;
+    partidos: c.partidos.filter(m=>{
+      const t1=state.teams.find(t=>t.id===m.t1);
+      const t2=state.teams.find(t=>t.id===m.t2);
+      return t1&&t2;
     })
-  })).filter(c => c.partidos.length > 0);
-  if(validCourts.length === 0){
+  })).filter(c=>c.partidos.length>0);
+  if(validCourts.length===0){
     card.style.display='none';
-    if(printSec)printSec.style.display='none';
+    if(printSec) printSec.style.display='none';
     return;
   }
-  currentFixtureCourts = courts;
+  currentFixtureCourts=courts;
   card.style.display='block';
-  if(printSec)printSec.style.display='block';
-  document.getElementById('print-tournament-name').textContent = currentTournament?.name || '';
+  if(printSec) printSec.style.display='block';
+  document.getElementById('print-tournament-name').textContent=currentTournament?.name||'';
   grid.innerHTML=validCourts.map(c=>`
     <div class="fixture-court">
       <div class="fixture-court-num">🏸 CANCHA ${c.numero}</div>
@@ -1391,72 +1519,80 @@ function renderFixture(courts){
       }).join('')}
     </div>`).join('');
 }
+
 async function addSet(mid){
   const m=state.matches.find(m=>m.id===mid);
-  if(!m||m.sets.length>=3){notify('Máximo 3 sets (2-0 o 2-1)',true);return;}
-  m.sets.push({s1:'',s2:''});await save();renderMatches();
+  if(!m||m.sets.length>=3){ notify('Máximo 3 sets (2-0 o 2-1)',true); return; }
+  m.sets.push({s1:'',s2:''}); await save(); renderMatches();
 }
-async function removeSet(mid,idx){
+
+async function removeSet(mid, idx){
   const m=state.matches.find(m=>m.id===mid);
-  if(!m||m.sets.length<=2){notify('Mínimo 2 sets',true);return;}
-  m.sets.splice(idx,1);await save();renderMatches();
+  if(!m||m.sets.length<=2){ notify('Mínimo 2 sets',true); return; }
+  m.sets.splice(idx,1); await save(); renderMatches();
 }
-async function updateScore(mid,si,side,val){
-  const m=state.matches.find(m=>m.id===mid);if(!m)return;
-  m.sets[si][side]=val===''?'':parseInt(val)||0;await save();
+
+async function updateScore(mid, si, side, val){
+  const m=state.matches.find(m=>m.id===mid); if(!m) return;
+  m.sets[si][side]=val===''?'':parseInt(val)||0; await save();
 }
+
 function validarResultado(sets){
-  if(!sets||sets.length<2)return{valido:false,ganador:null,resultado:'',error:'Mínimo 2 sets requeridos'};
-  if(sets.length>3)return{valido:false,ganador:null,resultado:'',error:'Máximo 3 sets permitidos'};
-  let winsA=0,winsB=0;
-  for(let i=0;i<sets.length;i++){
+  if(!sets||sets.length<2)  return{valido:false,ganador:null,resultado:'',error:'Mínimo 2 sets requeridos'};
+  if(sets.length>3)         return{valido:false,ganador:null,resultado:'',error:'Máximo 3 sets permitidos'};
+  let winsA=0, winsB=0;
+  for(let i=0; i<sets.length; i++){
     const s=sets[i];
     const vA=(s.s1===''||s.s1===null)?0:parseInt(s.s1)||0;
     const vB=(s.s2===''||s.s2===null)?0:parseInt(s.s2)||0;
-    if(vA===1&&vB===0){winsA++;continue;}
-    if(vA===0&&vB===1){winsB++;continue;}
-    if(vA>1||vB>1)return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: usar 1-0 o 0-1 (ganador del set)`};
-    return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: ambiguouso - usar 1-0 o 0-1`};
+    if(vA===1&&vB===0){ winsA++; continue; }
+    if(vA===0&&vB===1){ winsB++; continue; }
+    if(vA>1||vB>1) return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: usar 1-0 o 0-1 (ganador del set)`};
+    return{valido:false,ganador:null,resultado:'',error:`Set ${i+1}: ambiguo — usar 1-0 o 0-1`};
   }
-  if(winsA===0&&winsB===0)return{valido:false,ganador:null,resultado:'',error:'Al menos un set debe tener ganador'};
-  if(winsA>=2)return{valido:true,ganador:'A',resultado:`${winsA}-${winsB}`,error:null};
-  if(winsB>=2)return{valido:true,ganador:'B',resultado:`${winsB}-${winsA}`,error:null};
-  if(sets.length===3&&winsA===1&&winsB===1)return{valido:true,ganador:null,resultado:'1-1',error:'Falta definir ganador (3er set)'};
+  if(winsA===0&&winsB===0) return{valido:false,ganador:null,resultado:'',error:'Al menos un set debe tener ganador'};
+  if(winsA>=2) return{valido:true,ganador:'A',resultado:`${winsA}-${winsB}`,error:null};
+  if(winsB>=2) return{valido:true,ganador:'B',resultado:`${winsB}-${winsA}`,error:null};
+  if(sets.length===3&&winsA===1&&winsB===1) return{valido:true,ganador:null,resultado:'1-1',error:'Falta definir ganador (3er set)'};
   return{valido:false,ganador:null,resultado:`${winsA}-${winsB}`,error:'Un equipo debe ganar 2 sets'};
 }
+
 async function saveMatch(mid){
-  const m=state.matches.find(m=>m.id===mid);if(!m)return;
+  const m=state.matches.find(m=>m.id===mid); if(!m) return;
   const result=validarResultado(m.sets);
-  if(!result.valido){notify(result.error||'Resultado inválido',true);return;}
-  if(!result.ganador){notify('Resultado incompleto',true);return;}
+  if(!result.valido){ notify(result.error||'Resultado inválido',true); return; }
+  if(!result.ganador){ notify('Resultado incompleto',true); return; }
   m.winner=result.ganador==='A'?m.t1:m.t2;
   m.status='done';
-  await save();renderMatches();renderDashboard();renderStandings();
+  await save(); renderMatches(); renderDashboard(); renderStandings();
   const winner=state.teams.find(t=>t.id===m.winner);
   notify(`Guardado — ${winner.name} (${result.resultado}) ✓`);
 }
-async function setWinner(mid,setIdx,ganador){
-  const m=state.matches.find(m=>m.id===mid);if(!m||m.status==='done')return;
-  if(ganador==='A'){m.sets[setIdx].s1=1;m.sets[setIdx].s2=0;}
-  else{m.sets[setIdx].s1=0;m.sets[setIdx].s2=1;}
-  await save();renderMatches();
+
+async function setWinner(mid, setIdx, ganador){
+  const m=state.matches.find(m=>m.id===mid); if(!m||m.status==='done') return;
+  if(ganador==='A'){ m.sets[setIdx].s1=1; m.sets[setIdx].s2=0; }
+  else             { m.sets[setIdx].s1=0; m.sets[setIdx].s2=1; }
+  await save(); renderMatches();
 }
+
 async function deleteMatch(mid){
-  openConfirm('Eliminar partido','¿Eliminar este partido?',async()=>{
+  openConfirm('Eliminar partido','¿Eliminar este partido?', async()=>{
     state.matches=state.matches.filter(m=>m.id!==mid);
-    await save();renderMatches();renderDashboard();notify('Partido eliminado');
+    await save(); renderMatches(); renderDashboard(); notify('Partido eliminado');
   });
 }
+
 function renderMatches(){
   const el=document.getElementById('matches-list');
   const titleEl=document.getElementById('matches-cat-title');
-  if(!el)return;
+  if(!el) return;
   const cat=currentCat('matches');
   if(!cat){
     el.innerHTML=`<div class="empty-state"><div class="empty-icon">🗂</div><div class="empty-msg">No hay categorías</div></div>`;
     return;
   }
-  if(titleEl)titleEl.innerHTML=`Partidos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  if(titleEl) titleEl.innerHTML=`Partidos — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
   const catMatches=state.matches.filter(m=>m.categoryId===cat.id);
   if(!catMatches.length){
     el.innerHTML=`<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-msg">Sin partidos en esta categoría</div><div class="empty-sub">Creá un emparejamiento arriba</div></div>`;
@@ -1466,24 +1602,27 @@ function renderMatches(){
     const t1=state.teams.find(t=>t.id===m.t1);
     const t2=state.teams.find(t=>t.id===m.t2);
     const done=m.status==='done';
-    const t1w=m.winner===m.t1,t2w=m.winner===m.t2;
+    const t1w=m.winner===m.t1, t2w=m.winner===m.t2;
     const t1abbr=t1?t1.abbr.slice(0,3):'A';
     const t2abbr=t2?t2.abbr.slice(0,3):'B';
     const sh=m.sets.map((s,i)=>{
       const vA=s.s1||0;
       const vB=s.s2||0;
-      const winA=vA===1&&vB===0,winB=vA===0&&vB===1;
+      const winA=vA===1&&vB===0, winB=vA===0&&vB===1;
       return `
       <div class="set-block">
         <div class="set-label">SET ${i+1}</div>
         <div class="set-scores" style="gap:4px;">
-          ${done||winA?`<button class="btn btn-sm ${winA?'btn-success':'btn-secondary'}" disabled>${t1abbr} Gana</button>`:
-            `<button class="btn btn-sm btn-primary" onclick="setWinner(${m.id},${i},'A')">${t1abbr}</button>`}
-          ${done||winB?`<button class="btn btn-sm ${winB?'btn-success':'btn-secondary'}" disabled>${t2abbr} Gana</button>`:
-            `<button class="btn btn-sm btn-accent2" onclick="setWinner(${m.id},${i},'B')">${t2abbr}</button>`}
+          ${done||winA
+            ? `<button class="btn btn-sm ${winA?'btn-success':'btn-secondary'}" disabled>${t1abbr} Gana</button>`
+            : `<button class="btn btn-sm btn-primary" onclick="setWinner(${m.id},${i},'A')">${t1abbr}</button>`}
+          ${done||winB
+            ? `<button class="btn btn-sm ${winB?'btn-success':'btn-secondary'}" disabled>${t2abbr} Gana</button>`
+            : `<button class="btn btn-sm btn-accent2" onclick="setWinner(${m.id},${i},'B')">${t2abbr}</button>`}
           ${!done&&m.sets.length>2?`<button class="rem-set-btn" onclick="removeSet(${m.id},${i})">−</button>`:''}
         </div>
-      </div>`;}).join('');
+      </div>`;
+    }).join('');
     return `
       <div class="match-card ${done?'completed':''}">
         <div class="match-num">#${m.id}</div>
@@ -1509,40 +1648,48 @@ function renderMatches(){
 }
 
 /* ════════════════════════════════════════════
-    POSICIONES
+   STANDINGS
 ════════════════════════════════════════════ */
 function calcStandingsForCat(catId){
   const s={};
-  state.teams.filter(t=>t.categoryId===catId).forEach(t=>{s[t.id]={team:t,pj:0,g:0,p:0,sg:0,sp:0,pts:0};});
+  state.teams.filter(t=>t.categoryId===catId).forEach(t=>{
+    s[t.id]={team:t,pj:0,g:0,p:0,sg:0,sp:0,pts:0};
+  });
   state.matches.filter(m=>m.categoryId===catId&&m.status==='done').forEach(m=>{
-    if(!s[m.t1]||!s[m.t2])return;
-    let sg1=0,sg2=0;
-    m.sets.forEach(x=>{if(x.s1!==''&&x.s2!==''){if(x.s1>x.s2)sg1++;else if(x.s2>x.s1)sg2++;}});
-    s[m.t1].pj++;s[m.t2].pj++;
-    s[m.t1].sg+=sg1;s[m.t1].sp+=sg2;
-    s[m.t2].sg+=sg2;s[m.t2].sp+=sg1;
-    if(m.winner===m.t1){s[m.t1].g++;s[m.t1].pts+=3;s[m.t2].p++;}
-    else{s[m.t2].g++;s[m.t2].pts+=3;s[m.t1].p++;}
+    if(!s[m.t1]||!s[m.t2]) return;
+    let sg1=0, sg2=0;
+    m.sets.forEach(x=>{
+      if(x.s1!==''&&x.s2!==''){
+        if(x.s1>x.s2) sg1++;
+        else if(x.s2>x.s1) sg2++;
+      }
+    });
+    s[m.t1].pj++; s[m.t2].pj++;
+    s[m.t1].sg+=sg1; s[m.t1].sp+=sg2;
+    s[m.t2].sg+=sg2; s[m.t2].sp+=sg1;
+    if(m.winner===m.t1){ s[m.t1].g++; s[m.t1].pts+=3; s[m.t2].p++; }
+    else               { s[m.t2].g++; s[m.t2].pts+=3; s[m.t1].p++; }
   });
   return Object.values(s).sort((a,b)=>b.pts-a.pts||(b.sg-b.sp)-(a.sg-a.sp));
 }
+
 function renderStandings(){
   const body=document.getElementById('standings-body');
   const titleEl=document.getElementById('standings-cat-title');
-  if(!body)return;
+  if(!body) return;
   const cat=currentCat('standings');
   if(!cat){
     body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">No hay categorías</td></tr>`;
     return;
   }
-  if(titleEl)titleEl.innerHTML=`Posiciones — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
+  if(titleEl) titleEl.innerHTML=`Posiciones — <span style="color:${GENDER_COLOR[cat.gender]}">${cat.age} ${cat.gender}</span>`;
   const rows=calcStandingsForCat(cat.id);
   if(!rows.length||!rows.some(r=>r.pj>0)){
     body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">Sin datos en esta categoría</td></tr>`;
     return;
   }
   body.innerHTML=rows.map((r,i)=>{
-    const p=i+1,cls=p===1?'pos-1':p===2?'pos-2':p===3?'pos-3':'pos-n';
+    const p=i+1, cls=p===1?'pos-1':p===2?'pos-2':p===3?'pos-3':'pos-n';
     return `<tr>
       <td><div class="pos-badge ${cls}">${p}</div></td>
       <td><strong>${r.team.name}</strong> <span style="color:var(--text-muted);font-size:9px;">${r.team.abbr}</span></td>
@@ -1556,29 +1703,29 @@ function renderStandings(){
 }
 
 /* ════════════════════════════════════════════
-   Pantalla principal 
+   DASHBOARD
 ════════════════════════════════════════════ */
 function renderDashboard(){
-  const sr=document.getElementById('stats-row');if(!sr)return;
-  const totalTeams=state.teams.filter(t=>t.active).length;
-  const total=state.matches.length,done=state.matches.filter(m=>m.status==='done').length;
-  const cats=state.categories.length;
+  const sr=document.getElementById('stats-row'); if(!sr) return;
+  const totalTeams = state.teams.filter(t=>t.active).length;
+  const total      = state.matches.length;
+  const done       = state.matches.filter(m=>m.status==='done').length;
+  const cats       = state.categories.length;
   sr.innerHTML=`
     <div class="stat-card"><div class="stat-val">${cats}</div><div class="stat-lbl">Categorías</div></div>
     <div class="stat-card"><div class="stat-val">${totalTeams}</div><div class="stat-lbl">Equipos</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--win)">${done}</div><div class="stat-lbl">Finalizados</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${total-done}</div><div class="stat-lbl">Pendientes</div></div>`;
 
-  // Category overview
   const catOv=document.getElementById('dash-cats');
   if(!state.categories.length){
     catOv.innerHTML=`<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías. Ir a la sección <strong>Categorías</strong> para agregar.</div>`;
-  }else{
+  } else {
     catOv.innerHTML=state.categories.map(c=>{
-      const teams=state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
-      const cdone=state.matches.filter(m=>m.categoryId===c.id&&m.status==='done').length;
-      const ctotal=state.matches.filter(m=>m.categoryId===c.id).length;
-      const leader=calcStandingsForCat(c.id).filter(r=>r.pj>0)[0];
+      const teams  = state.teams.filter(t=>t.categoryId===c.id&&t.active).length;
+      const cdone  = state.matches.filter(m=>m.categoryId===c.id&&m.status==='done').length;
+      const ctotal = state.matches.filter(m=>m.categoryId===c.id).length;
+      const leader = calcStandingsForCat(c.id).filter(r=>r.pj>0)[0];
       return `<div class="cat-overview-card" onclick="goToCatSection('standings',${c.id})">
         <div class="co-name" style="color:${GENDER_COLOR[c.gender]}">${GENDER_ICON[c.gender]} ${c.age} ${c.gender}</div>
         <div class="co-stats">
@@ -1590,31 +1737,30 @@ function renderDashboard(){
     }).join('');
   }
 
-  // Logica resultados recientes 
   const rec=document.getElementById('dash-recent');
   const dm=state.matches.filter(m=>m.status==='done').slice(-5).reverse();
-  rec.innerHTML=!dm.length?'<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin resultados aún</div>':
-    dm.map(m=>{
-      const w=state.teams.find(t=>t.id===m.winner);
-      const l=state.teams.find(t=>t.id===(m.winner===m.t1?m.t2:m.t1));
-      const cat=state.categories.find(c=>c.id===m.categoryId);
-      const sc=m.sets.filter(s=>s.s1!==''&&s.s2!=='').map(s=>`${s.s1}-${s.s2}`).join(' | ');
-      return `<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <div>
-          ${cat?`<span class="cat-pill cat-pill-${GENDER_CLASS[cat.gender]}" style="margin-bottom:2px;">${cat.age}</span> `:''}
-          <span style="color:var(--win);font-weight:600;">${w?w.name:'?'}</span>
-          <span style="color:var(--text-muted);font-size:11px;"> vs ${l?l.name:'?'}</span>
-        </div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);flex-shrink:0;">${sc}</div>
-      </div>`;
-    }).join('');
+  rec.innerHTML=!dm.length
+    ? '<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin resultados aún</div>'
+    : dm.map(m=>{
+        const w   = state.teams.find(t=>t.id===m.winner);
+        const l   = state.teams.find(t=>t.id===(m.winner===m.t1?m.t2:m.t1));
+        const cat = state.categories.find(c=>c.id===m.categoryId);
+        const sc  = m.sets.filter(s=>s.s1!==''&&s.s2!=='').map(s=>`${s.s1}-${s.s2}`).join(' | ');
+        return `<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div>
+            ${cat?`<span class="cat-pill cat-pill-${GENDER_CLASS[cat.gender]}" style="margin-bottom:2px;">${cat.age}</span> `:''}
+            <span style="color:var(--win);font-weight:600;">${w?w.name:'?'}</span>
+            <span style="color:var(--text-muted);font-size:11px;"> vs ${l?l.name:'?'}</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);flex-shrink:0;">${sc}</div>
+        </div>`;
+      }).join('');
 
-  // Lideres por categoria
   const ld=document.getElementById('dash-leaders');
-  if(!state.categories.length){ld.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías aún</div>';return;}
+  if(!state.categories.length){ ld.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Sin categorías aún</div>'; return; }
   ld.innerHTML=state.categories.map(c=>{
     const top=calcStandingsForCat(c.id).filter(r=>r.pj>0).slice(0,3);
-    if(!top.length)return `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);">${GENDER_ICON[c.gender]} ${c.age} ${c.gender} — sin datos</div>`;
+    if(!top.length) return `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);">${GENDER_ICON[c.gender]} ${c.age} ${c.gender} — sin datos</div>`;
     return top.map((r,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
         <div class="pos-badge ${i===0?'pos-1':i===1?'pos-2':'pos-3'}">${i+1}</div>
@@ -1626,22 +1772,19 @@ function renderDashboard(){
 }
 
 function goToCatSection(section, catId){
-
-  activeTab.teams=catId;
-  activeTab.matches=catId;
-  activeTab.standings=catId;
-  showPage(section,null);
-  
+  activeTab.teams    = catId;
+  activeTab.matches  = catId;
+  activeTab.standings= catId;
+  showPage(section, null);
   const navBtns=document.querySelectorAll('.nav-btn');
   navBtns.forEach(b=>b.classList.remove('active'));
   const map={teams:2,matches:3,standings:4};
-  if(map[section]!==undefined)navBtns[map[section]]?.classList.add('active');
-  // Update all category bars and dropdowns
+  if(map[section]!==undefined) navBtns[map[section]]?.classList.add('active');
   renderCatBar('teams-cat-bar','teams');
   renderCatBar('matches-cat-bar','matches');
   renderCatBar('standings-cat-bar','standings');
   const teamSel=document.getElementById('inp-team-cat');
-  if(teamSel)teamSel.value=catId;
+  if(teamSel) teamSel.value=catId;
   renderTeamCatSelect();
   renderMatchSelects();
   renderTeams();
@@ -1657,16 +1800,22 @@ async function renderProfile(){
   document.getElementById('profile-avatar').textContent=name.slice(0,2).toUpperCase();
   document.getElementById('profile-name').textContent=name;
   document.getElementById('profile-email').textContent=currentUser?.email||'—';
-  const since=currentUser?.created_at?new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  const since=currentUser?.created_at
+    ? new Date(currentUser.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})
+    : '—';
   document.getElementById('profile-since').textContent='Miembro desde '+since;
   let list=[];
-  if(isConfigured()){const{data}=await db.from('tournaments').select('data').eq('user_id',currentUser.id);list=data||[];}
-  else{const raw=localStorage.getItem(getTKey());list=raw?JSON.parse(raw):[];}
-  let nt=list.length,nteams=0,nmatches=0,ncats=0;
+  if(isConfigured()){
+    const{data}=await db.from('tournaments').select('data').eq('user_id',currentUser.id);
+    list=data||[];
+  } else {
+    const raw=localStorage.getItem(getTKey()); list=raw?JSON.parse(raw):[];
+  }
+  let nt=list.length, nteams=0, nmatches=0, ncats=0;
   list.forEach(t=>{
-    nteams+=(t.data?.teams?.filter(x=>x.active).length||0);
-    nmatches+=(t.data?.matches?.filter(x=>x.status==='done').length||0);
-    ncats+=(t.data?.categories?.length||0);
+    nteams  += (t.data?.teams?.filter(x=>x.active).length||0);
+    nmatches+= (t.data?.matches?.filter(x=>x.status==='done').length||0);
+    ncats   += (t.data?.categories?.length||0);
   });
   document.getElementById('profile-stats').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1682,44 +1831,55 @@ async function renderProfile(){
    RENDER ALL
 ════════════════════════════════════════════ */
 function renderAll(){
-  if(!currentTournament)return;
+  if(!currentTournament) return;
   renderDashboard();
   renderCategories();
-  renderCatBar('teams-cat-bar','teams');renderTeams();renderTeamCatSelect();
-  renderCatBar('matches-cat-bar','matches');renderMatchSelects();renderMatches();
-  renderCatBar('standings-cat-bar','standings');renderStandings();
+  renderCatBar('teams-cat-bar','teams');    renderTeamCatSelect(); renderTeams();
+  renderCatBar('matches-cat-bar','matches'); renderMatchSelects();  renderMatches();
+  renderCatBar('standings-cat-bar','standings');                    renderStandings();
 }
 
 /* ════════════════════════════════════════════
    MODALS
 ════════════════════════════════════════════ */
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function openConfirm(title,body,cb){
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openConfirm(title, body, cb){
   document.getElementById('mc-title').textContent=title;
   document.getElementById('mc-body').innerHTML=`<p style="color:var(--text-muted);font-size:13px;line-height:1.7;">${body}</p>`;
-  document.getElementById('mc-btn').onclick=()=>{cb&&cb();closeModal('modal-confirm');};
+  document.getElementById('mc-btn').onclick=()=>{ cb&&cb(); closeModal('modal-confirm'); };
   openModal('modal-confirm');
 }
+
 document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
 });
 
 /* ════════════════════════════════════════════
    NOTIFICATION
 ════════════════════════════════════════════ */
 let _nt;
-function notify(msg,isErr=false){
+function notify(msg, isErr=false){
   const el=document.getElementById('notif');
-  el.textContent=msg;el.className='show'+(isErr?' danger':'');
-  clearTimeout(_nt);_nt=setTimeout(()=>el.classList.remove('show'),3200);
+  el.textContent=msg;
+  el.className='show'+(isErr?' danger':'');
+  clearTimeout(_nt);
+  _nt=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
+/* ════════════════════════════════════════════
+   AUTH STATE CHANGE
+════════════════════════════════════════════ */
 if(isConfigured()){
-  db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentTournament=null;}});
+  db.auth.onAuthStateChange((event)=>{
+    if(event==='SIGNED_OUT'){ currentUser=null; currentTournament=null; }
+  });
 }
 
+/* ── ARRANCAR ── */
 boot();
+
 </script>
 </body>
 </html>
