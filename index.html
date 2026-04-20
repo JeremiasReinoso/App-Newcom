@@ -345,6 +345,27 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .fixture-match-n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);width:18px;}
 .fixture-vs{color:var(--text-muted);font-size:10px;}
 
+.fixture-config-block{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:12px;}
+.fixture-block-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.fixt-info-text{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 10px;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;}
+.fixture-action-block{padding:8px 0;}
+.btn-generate-fixture{background:linear-gradient(135deg,var(--accent) 0%,#00b8d9 100%);color:#020509;border:none;padding:18px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:all .3s;border-radius:4px;box-shadow:0 4px 15px rgba(0,212,255,.3);}
+.btn-generate-fixture:hover{background:linear-gradient(135deg,#00eeff 0%,#00d4ff 100%);box-shadow:0 6px 24px rgba(0,212,255,.5);transform:translateY(-2px);}
+.btn-generate-fixture:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.fixture-result-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:16px;}
+.fixture-result-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.fixture-result-summary{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;gap:20px;flex-wrap:wrap;}
+.fixture-result-summary span{display:flex;align-items:center;gap:6px;}
+.fixture-result-summary .label{color:var(--text-muted);}
+.fixture-result-summary .value{color:var(--accent);font-weight:600;}
+.fixture-turno{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.fixture-turno-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent2);width:100%;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.fixture-turno-courts{display:flex;gap:10px;flex-wrap:wrap;flex:1;}
+.fixture-turno-match{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;flex:1;min-width:160px;}
+.fixture-turno-match-n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-bottom:4px;}
+.fixture-turno-match-teams{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+
 /* ── WORKFLOW SECTIONS ── */
 .workflow-section{margin-bottom:24px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:4px;}
 .workflow-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
@@ -655,21 +676,85 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       </div>
     </div>
 
-    <!-- SECCIÓN 2: FIXTURE -->
-    <div class="workflow-section no-print">
-      <div class="workflow-section-title"><span class="step-num">2</span> FIXTURE</div>
+    <!-- SECCIÓN 2: FIXTURE INTELIGENTE -->
+    <div class="workflow-section no-print" id="fixture-custom-section">
+      <div class="workflow-section-title"><span class="step-num">2</span> FIXTURE INTELIGENTE</div>
+      
+      <!-- BLOQUE 1: Configuración del Torneo -->
+      <div class="fixture-config-block">
+        <div class="fixture-block-title">CONFIGURACIÓN</div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:200px;">
+            <label>Categoría</label>
+            <select id="sel-fixture-cat" onchange="onFixtureCatChange()">
+              <option value="">— seleccionar —</option>
+            </select>
+          </div>
+          <div class="form-group" style="max-width:160px;">
+            <label>Nombre del Fixture</label>
+            <input type="text" id="inp-fixture-name" placeholder="Ej: Fase de Grupos">
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: Generación de Partidos -->
+      <div class="fixture-config-block">
+        <div class="fixture-block-title">PARTIDOS POR EQUIPO</div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:140px;">
+            <label>Partidos x Equipo</label>
+            <input type="number" id="inp-matches-per-team" min="1" value="1" onchange="validateMatchesPerTeam()">
+          </div>
+          <div class="form-group" style="max-width:180px;">
+            <label>Partidos máximos posibles</label>
+            <div class="fixt-info-text" id="max-possible-matches">—</div>
+          </div>
+        </div>
+        <div class="err-msg" id="fixture-gen-err"></div>
+      </div>
+
+      <!-- BLOQUE 3: Configuración de Canchas -->
+      <div class="fixture-config-block">
+        <div class="fixture-block-title">CONFIGURACIÓN DE CANCHAS</div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:120px;">
+            <label>Cant. Canchas</label>
+            <input type="number" id="inp-fixture-courts" min="1" value="2">
+          </div>
+          <div class="form-group" style="max-width:120px;">
+            <label>Partidos x Cancha</label>
+            <input type="number" id="inp-fixture-mpc" min="1" value="2">
+          </div>
+          <div class="form-group" style="max-width:120px;">
+            <label>Turnos</label>
+            <div class="fixt-info-text" id="fixture-rounds-info">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 4: Acción Principal -->
+      <div class="fixture-action-block">
+        <button class="btn btn-full btn-generate-fixture" id="btn-generate-fixture" onclick="generarFixtureCustom()">
+          ⚡ Generar Fixture Inteligente
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2 (OLD): FIXTURE simple - compatibilidad -->
+    <div class="workflow-section no-print" id="fixture-simple-section" style="display:none;">
+      <div class="workflow-section-title"><span class="step-num">2</span> FIXTURE (Simple)</div>
       <div class="form-row">
         <div class="form-group" style="max-width:100px;">
           <label>Canchas</label>
-          <input type="number" id="inp-fixture-courts" min="1" value="2">
+          <input type="number" id="inp-fixture-courts-old" min="1" value="2">
         </div>
         <div class="form-group" style="max-width:100px;">
           <label>Partidos/Cancha</label>
-          <input type="number" id="inp-fixture-mpc" min="1" value="2">
+          <input type="number" id="inp-fixture-mpc-old" min="1" value="2">
         </div>
         <div class="form-group" style="max-width:160px;">
           <label>Nombre ronda</label>
-          <input type="text" id="inp-fixture-round" placeholder="Ej: Ronda 1">
+          <input type="text" id="inp-fixture-round-old" placeholder="Ej: Ronda 1">
         </div>
         <button class="btn btn-primary" onclick="generateFixture()">🏸 Generar Fixture</button>
       </div>
@@ -976,6 +1061,7 @@ function showApp(){
   const name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'?';
   document.getElementById('hdr-avatar').textContent=name.slice(0,2).toUpperCase();
   document.getElementById('hdr-uname').textContent=name;
+  initFixtureInputs();
   goToTournaments();
 }
 
@@ -1347,6 +1433,8 @@ function renderMatchSelects(){
   const cat=currentCat('matches');
   if(cat) catSel.value=cat.id;
   fillTeamSelects(cat?.id);
+  renderFixtureSelects();
+  validateMatchesPerTeam();
 }
 
 function onMatchCatChange(){
@@ -1644,12 +1732,339 @@ function renderMatches(){
           <button class="btn btn-danger btn-sm" onclick="deleteMatch(${m.id})">Eliminar</button>
         </div>
       </div>`;
-  }).join('');
+}).join('');
+}
+
+/* ════════════════════════════════════════════
+   FIXTURE INTELIGENTE - NUEVAS FUNCIONES
+═══════════════════════════════════════════ */
+
+// Lógica de generación de partidos basada en matchesPerTeam
+function generarPartidos(teams, matchesPerTeam) {
+  const teamIds = teams.map(t => t.id);
+  const teamCount = teamIds.length;
+  const maxMatchesPossible = teamCount - 1;
+  
+  const teamMatchCount = {};
+  teamIds.forEach(id => teamMatchCount[id] = 0);
+  
+  const createdMatches = [];
+  const maxIterations = teamCount * matchesPerTeam * 10;
+  let iterations = 0;
+  
+  while (iterations < maxIterations) {
+    iterations++;
+    const available = teamIds.filter(id => teamMatchCount[id] < matchesPerTeam);
+    if (available.length < 2) break;
+    
+    let bestPair = null;
+    let bestScore = -1;
+    
+    for (let i = 0; i < available.length; i++) {
+      for (let j = i + 1; j < available.length; j++) {
+        const t1 = available[i];
+        const t2 = available[j];
+        
+        const alreadyExists = createdMatches.some(m => 
+          (m.t1 === t1 && m.t2 === t2) || (m.t1 === t2 && m.t2 === t1)
+        );
+        if (alreadyExists) continue;
+        
+        const score = teamMatchCount[t1] + teamMatchCount[t2];
+        if (score > bestScore) {
+          bestScore = score;
+          bestPair = [t1, t2];
+        }
+      }
+    }
+    
+    if (bestPair) {
+      createdMatches.push({ t1: bestPair[0], t2: bestPair[1] });
+      teamMatchCount[bestPair[0]]++;
+      teamMatchCount[bestPair[1]]++;
+    }
+  }
+  
+  return createdMatches;
+}
+
+// Validar matchesPerTeam contra el máximo posible
+function validateMatchesPerTeam() {
+  const catId = parseInt(document.getElementById('sel-fixture-cat')?.value);
+  const inputEl = document.getElementById('inp-matches-per-team');
+  const maxInfoEl = document.getElementById('max-possible-matches');
+  const errEl = document.getElementById('fixture-gen-err');
+  
+  if (!catId || !inputEl || !maxInfoEl) return;
+  
+  const active = state.teams.filter(t => t.categoryId === catId && t.active);
+  if (active.length < 2) {
+    maxInfoEl.textContent = '—';
+    inputEl.max = '';
+    return;
+  }
+  
+  const maxPossible = active.length - 1;
+  maxInfoEl.textContent = `máx ${maxPossible}`;
+  inputEl.max = maxPossible;
+  
+  const currentVal = parseInt(inputEl.value) || 1;
+  if (currentVal > maxPossible) {
+    inputEl.value = maxPossible;
+  }
+  
+  if (errEl) errEl.textContent = '';
+  
+  updateRoundsInfo();
+}
+
+// Actualizar información de turnos
+function updateRoundsInfo() {
+  const courts = parseInt(document.getElementById('inp-fixture-courts')?.value) || 1;
+  const mpc = parseInt(document.getElementById('inp-fixture-mpc')?.value) || 1;
+  const matchesPerTeam = parseInt(document.getElementById('inp-matches-per-team')?.value) || 1;
+  const catId = parseInt(document.getElementById('sel-fixture-cat')?.value);
+  
+  const roundsEl = document.getElementById('fixture-rounds-info');
+  if (!roundsEl) return;
+  
+  if (!catId) {
+    roundsEl.textContent = '—';
+    return;
+  }
+  
+  const active = state.teams.filter(t => t.categoryId === catId && t.active);
+  const totalMatchesNeeded = Math.floor(active.length / 2) * matchesPerTeam;
+  const totalCapacity = courts * mpc;
+  const rounds = Math.ceil(totalMatchesNeeded / totalCapacity);
+  
+  roundsEl.textContent = `~${rounds} turn${rounds !== 1 ? 's' : ''}`;
+}
+
+// Cambiar categoría en fixture
+function onFixtureCatChange() {
+  const catId = parseInt(document.getElementById('sel-fixture-cat')?.value);
+  
+  const catSel = document.getElementById('sel-match-cat');
+  if (catSel && catId) {
+    catSel.value = catId;
+    onMatchCatChange();
+  }
+  
+  validateMatchesPerTeam();
+  renderFixtureSelects();
+}
+
+// Agregar event listeners a inputs del fixture
+function initFixtureInputs(){
+  const courtsInp = document.getElementById('inp-fixture-courts');
+  const mpcInp = document.getElementById('inp-fixture-mpc');
+  const matchPerTeamInp = document.getElementById('inp-matches-per-team');
+  
+  if(courtsInp){
+    courtsInp.oninput = updateRoundsInfo;
+  }
+  if(mpcInp){
+    mpcInp.oninput = updateRoundsInfo;
+  }
+  if(matchPerTeamInp){
+    matchPerTeamInp.onchange = validateMatchesPerTeam;
+  }
+}
+
+// Renderizar selects para fixture
+function renderFixtureSelects() {
+  const catSel = document.getElementById('sel-fixture-cat');
+  if (!catSel) return;
+  
+  catSel.innerHTML = '<option value="">— seleccionar —</option>' + 
+    state.categories.map(c => `<option value="${c.id}">${c.age} ${GENDER_ICON[c.gender]} ${c.gender}</option>`).join('');
+  
+  const cat = currentCat('matches');
+  if (cat && catSel) {
+    catSel.value = cat.id;
+  }
+}
+
+// Asignar partidos a canchas y turnos
+function asignarCanchas(partidos, courts, matchesPerCourt) {
+  const structure = [];
+  let matchIdx = 0;
+  let roundIdx = 1;
+  
+  while (matchIdx < partidos.length) {
+    const round = {
+      numero: roundIdx,
+      canchas: []
+    };
+    
+    for (let c = 0; c < courts; c++) {
+      const courtMatches = [];
+      for (let m = 0; m < matchesPerCourt && matchIdx < partidos.length; m++) {
+        courtMatches.push(partidos[matchIdx]);
+        matchIdx++;
+      }
+      if (courtMatches.length > 0) {
+        round.canchas.push({
+          numero: c + 1,
+          partidos: courtMatches
+        });
+      }
+    }
+    
+    if (round.canchas.length > 0) {
+      structure.push(round);
+    }
+    roundIdx++;
+  }
+  
+  return structure;
+}
+
+// Función principal para generar fixture custom
+async function generarFixtureCustom() {
+  const catId = parseInt(document.getElementById('sel-fixture-cat')?.value);
+  const matchesPerTeam = parseInt(document.getElementById('inp-matches-per-team')?.value) || 1;
+  const courts = parseInt(document.getElementById('inp-fixture-courts')?.value) || 1;
+  const matchesPerCourt = parseInt(document.getElementById('inp-fixture-mpc')?.value) || 1;
+  const fixtureName = document.getElementById('inp-fixture-name')?.value.trim() || `Fixture ${state.matchCounter}`;
+  
+  const errEl = document.getElementById('fixture-gen-err');
+  if (errEl) errEl.textContent = '';
+  
+  if (!catId) {
+    if (errEl) errEl.textContent = 'Seleccioná una categoría';
+    notify('Seleccioná una categoría', true);
+    return;
+  }
+  
+  const active = state.teams.filter(t => t.categoryId === catId && t.active);
+  if (active.length < 2) {
+    if (errEl) errEl.textContent = 'Se necesitan al menos 2 equipos';
+    notify('Se necesitan al menos 2 equipos', true);
+    return;
+  }
+  
+  const maxPossible = active.length - 1;
+  if (matchesPerTeam > maxPossible) {
+    if (errEl) errEl.textContent = `Máximo ${maxPossible} partidos por equipo`;
+    notify(`Máximo ${maxPossible} partidos por equipo`, true);
+    return;
+  }
+  
+  const nuevosPartidos = generarPartidos(active, matchesPerTeam);
+  
+  if (nuevosPartidos.length === 0) {
+    if (errEl) errEl.textContent = 'No se pudieron generar partidos';
+    notify('No se pudieron generar partidos', true);
+    return;
+  }
+  
+  for (const p of nuevosPartidos) {
+    const existingMatch = state.matches.find(m => 
+      m.categoryId === catId && m.status === 'pending' &&
+      ((m.t1 === p.t1 && m.t2 === p.t2) || (m.t1 === p.t2 && m.t2 === p.t1))
+    );
+    
+    if (!existingMatch) {
+      state.matches.push({
+        id: state.matchCounter++,
+        t1: p.t1,
+        t2: p.t2,
+        categoryId: catId,
+        round: fixtureName,
+        sets: [{ s1: '', s2: '' }, { s1: '', s2: '' }],
+        status: 'pending',
+        winner: null
+      });
+    }
+  }
+  
+  const allMatchesCat = state.matches.filter(m => m.categoryId === catId && m.status === 'pending');
+  const fixtureData = asignarCanchas(allMatchesCat, courts, matchesPerCourt);
+  
+  await save();
+  renderFixtureCustomDisplay(fixtureData, active, courts, matchesPerCourt, nuevosPartidos.length, fixtureName);
+  renderMatches();
+  renderDashboard();
+  
+  notify(`Fixture generado: ${nuevosPartidos.length} partidos en ${fixtureData.length} turno(s) ✓`);
+}
+
+// Renderizar resultado del fixture custom
+function renderFixtureCustomDisplay(fixtureData, teams, courts, matchesPerCourt, totalMatchesGenerated, fixtureName) {
+  const card = document.getElementById('fixture-card');
+  const grid = document.getElementById('fixture-grid');
+  const printSec = document.getElementById('print-section');
+  
+  if (!card || !grid) return;
+  
+  if (!fixtureData || fixtureData.length === 0) {
+    card.style.display = 'none';
+    if (printSec) printSec.style.display = 'none';
+    return;
+  }
+  
+  card.style.display = 'block';
+  if (printSec) printSec.style.display = 'block';
+  
+  const teamMap = {};
+  teams.forEach(t => teamMap[t.id] = t);
+  
+  const teamCount = teams.length;
+  const totalPartidos = fixtureData.reduce((acc, r) => 
+    acc + r.canchas.reduce((a, c) => a + c.partidos.length, 0), 0
+  );
+  const totalRounds = fixtureData.length;
+  
+  document.getElementById('print-tournament-name').textContent = currentTournament?.name || '';
+  
+  let html = `<div class="fixture-result-section">
+    <div class="fixture-result-title">
+      <span>🏸 ${fixtureName.toUpperCase()}</span>
+    </div>
+    <div class="fixture-result-summary">
+      <span><span class="label">Equipos:</span> <span class="value">${teamCount}</span></span>
+      <span><span class="label">Partidos:</span> <span class="value">${totalMatchesGenerated}</span></span>
+      <span><span class="label">Canchas:</span> <span class="value">${courts}</span></span>
+      <span><span class="label">Turnos:</span> <span class="value">${totalRounds}</span></span>
+    </div>`;
+  
+  fixtureData.forEach(round => {
+    html += `<div class="fixture-turno">
+      <div class="fixture-turno-title">TURNO ${round.numero}</div>
+      <div class="fixture-turno-courts">`;
+    
+    round.canchas.forEach(court => {
+      html += `<div class="fixture-turno-match">
+        <div class="fixture-turno-match-n">🏸 Cancha ${court.numero}</div>
+        <div class="fixture-turno-match-teams">`;
+      
+      court.partidos.forEach((match, idx) => {
+        const t1 = teamMap[match.t1];
+        const t2 = teamMap[match.t2];
+        html += `<div style="margin-bottom:4px;">
+          <span style="color:var(--text-muted);">${idx + 1}.</span>
+          <span>${t1 ? t1.abbr : '?'}</span>
+          <span style="color:var(--text-muted);">vs</span>
+          <span>${t2 ? t2.abbr : '?'}</span>
+        </div>`;
+      });
+      
+      html += `</div></div>`;
+    });
+    
+    html += `</div></div>`;
+  });
+  
+  html += `</div>`;
+  
+  grid.innerHTML = html;
 }
 
 /* ════════════════════════════════════════════
    STANDINGS
-════════════════════════════════════════════ */
+═══════════════════════════════════════════ */
 function calcStandingsForCat(catId){
   const s={};
   state.teams.filter(t=>t.categoryId===catId).forEach(t=>{
