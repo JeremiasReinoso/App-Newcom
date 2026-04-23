@@ -1008,30 +1008,40 @@ function switchTab(tab){
   document.getElementById('tab-register').classList.toggle('active', tab==='register');
 }
 
-const fs = require('fs');
-let data = {
-  torneos: 5
-};
-fs.writeFileSync('licencia.dat', JSON.stringify(data));
-data.torneos -=1; 
-fs.writeFileSync('licencia.dat', JSON.stringify(data));
-if (data.torneos <= 0){
-  alert('Licencia Agotada.');
+// Módulos de Node.js - solo disponibles en Electron
+let fs, crypto;
+if (typeof require !== 'undefined') {
+  fs = require('fs');
+  crypto = require('crypto');
+  
+  // Inicializar licencia solo en Electron
+  let data = {
+    torneos: 5
+  };
+  fs.writeFileSync('licencia.dat', JSON.stringify(data));
+  data.torneos -= 1; 
+  fs.writeFileSync('licencia.dat', JSON.stringify(data));
+  if (data.torneos <= 0) {
+    alert('Licencia Agotada.');
+  }
 }
-const clave = "ABC-5"
 
+const clave = "ABC-5"
 const partes = clave.split('-');
 const torneos = parseInt(partes[1]);
 
-const crypto = require('crypto');
-
 function generarClave(torneos) {
-  const secreto = "Clave-secreta";
-  const hash = crypto
-    .createHash('sha256')
-    .update(torneos + secreto)
-    .digest('hex');
-  return '${torneos}-${hash}';
+  // En Electron, generar hash con crypto
+  if (typeof require !== 'undefined' && crypto) {
+    const secreto = "Clave-secreta";
+    const hash = crypto
+      .createHash('sha256')
+      .update(torneos + secreto)
+      .digest('hex');
+    return `${torneos}-${hash}`;
+  }
+  // En navegador, solo devolver la clave
+  return `${torneos}-browser`;
 }
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
