@@ -4,7 +4,15 @@
   "description": "Modificar: Colocar horarios a los partidos, ver como poner como si fuera una tabla de excel, para poder imprimir el fixture",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.tuapp.newcom",
+    "productName": "App Newcom",
+    "win": {
+      "target": "nsis"
+    }
   },
   "repository": {
     "type": "git",
@@ -19,6 +27,7 @@
   },
   "homepage": "https://github.com/JeremiasReinoso/App-Newcom#readme",
   "devDependencies": {
-    "electron": "^41.3.0"
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1"
   }
 }
