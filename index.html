@@ -1008,6 +1008,31 @@ function switchTab(tab){
   document.getElementById('tab-register').classList.toggle('active', tab==='register');
 }
 
+const fs = require('fs');
+let data = {
+  torneos: 5
+};
+fs.writeFileSync('licencia.dat', JSON.stringify(data));
+data.torneos -=1; 
+fs.writeFileSync('licencia.dat', JSON.stringify(data));
+if (data.torneos <= 0){
+  alert('Licencia Agotada.');
+}
+const clave = "ABC-5"
+
+const partes = clave.split('-');
+const torneos = parseInt(partes[1]);
+
+const crypto = require('crypto');
+
+function generarClave(torneos) {
+  const secreto = "Clave-secreta";
+  const hash = crypto
+    .createHash('sha256')
+    .update(torneos + secreto)
+    .digest('hex');
+  return '${torneos}-${hash}';
+}
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
