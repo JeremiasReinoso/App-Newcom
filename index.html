@@ -242,6 +242,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .round-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
   color:var(--accent2);background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);
   padding:2px 7px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.jornada-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);
+  padding:4px 10px;border-radius:20px;margin-bottom:8px;display:inline-block;font-weight:600;}
+.fixture-horario-block{background:var(--surface2);border-left:4px solid var(--accent);border-radius:4px;padding:16px;margin-bottom:16px;}
+.fixture-horario-time{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.fixture-horario-partidos{display:flex;flex-direction:column;gap:8px;}
+.fixture-horario-partido{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:3px;padding:10px 12px;font-size:13px;display:flex;align-items:center;gap:12px;}
+.fixture-cancha-badge{background:var(--accent2);color:#020509;font-family:'Bebas Neue',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;padding:3px 8px;border-radius:3px;flex-shrink:0;min-width:65px;text-align:center;}
 .match-teams{display:flex;align-items:center;gap:8px;}
 .match-team{font-weight:600;font-size:13px;flex:1;text-align:center;}
 .match-team.winner{color:var(--win);}
@@ -664,7 +672,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
             </select>
           </div>
           <div class="form-group" style="max-width:160px;">
-            <label>Nombre del Fixture</label>
+            <label>Nombre de la Jornada / Fase</label>
             <input type="text" id="inp-fixture-name" placeholder="Ej: Fase de Grupos">
           </div>
         </div>
@@ -686,31 +694,40 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
         <div class="err-msg" id="fixture-gen-err"></div>
       </div>
 
-      <!-- BLOQUE 3: Configuración de Canchas y Horarios -->
+      <!-- BLOQUE 3: Cronograma del Torneo -->
 <div class="fixture-config-block">
-  <div class="fixture-block-title">CANCHAS Y HORARIOS</div>
+  <div class="fixture-block-title">📅 CRONOGRAMA DE LA JORNADA</div>
   <div class="form-row">
-    <div class="form-group" style="max-width:120px;">
-      <label>Cant. Canchas</label>
+    <div class="form-group" style="max-width:100px;">
+      <label>Canchas disponibles</label>
       <input type="number" id="inp-fixture-courts" min="1" value="2" oninput="updateFixturePreview()">
     </div>
-    <div class="form-group" style="max-width:140px;">
-      <label>Hora de inicio</label>
+    <div class="form-group" style="max-width:120px;">
+      <label>Inicio jornada</label>
       <input type="time" id="inp-fixture-start" value="09:00" oninput="updateFixturePreview()">
     </div>
-    <div class="form-group" style="max-width:160px;">
+    <div class="form-group" style="max-width:120px;">
+      <label>Fin jornada</label>
+      <input type="time" id="inp-fixture-end-limit" value="18:00" oninput="updateFixturePreview()">
+    </div>
+    <div class="form-group" style="max-width:140px;">
       <label>Duración partido (min)</label>
       <input type="number" id="inp-fixture-duration" min="5" value="30" oninput="updateFixturePreview()">
     </div>
-    <div class="form-group" style="max-width:160px;">
+    <div class="form-group" style="max-width:140px;">
       <label>Descanso entre partidos (min)</label>
       <input type="number" id="inp-fixture-gap" min="0" value="10" oninput="updateFixturePreview()">
     </div>
-    <div class="form-group" style="max-width:140px;">
-      <label>Hora fin estimada</label>
-      <div class="fixt-info-text" id="fixture-end-time">—</div>
+  </div>
+  <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:4px;padding:12px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;">
+    <div style="color:var(--text-muted);margin-bottom:8px;">📊 Capacidad estimada:</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <span>⏱ <span style="color:var(--accent);">Tiempo disponible:</span> <span id="fixture-time-available">—</span></span>
+      <span>📦 <span style="color:var(--accent);">Partidos/cancha:</span> <span id="fixture-capacity-per-court">—</span></span>
+      <span>🔴 <span style="color:var(--accent);">Partidos máx:</span> <span id="fixture-max-matches">—</span></span>
     </div>
   </div>
+  <div class="err-msg" id="fixture-capacity-warning" style="margin-top:10px;"></div>
 </div>
 
       <!-- BLOQUE 4: Acción Principal -->
@@ -728,7 +745,7 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
             <select id="sel-team2" style="width:100%;"><option value="">— seleccionar —</option></select>
           </div>
           <div class="form-group" style="flex:0 0 auto;min-width:140px;">
-            <label style="margin-bottom:2px;">Ronda / Fase</label>
+            <label style="margin-bottom:2px;">Jornada / Fase</label>
             <input type="text" id="inp-round" placeholder="Ej: Grupos" style="width:100%;">
           </div>
           <button class="btn btn-secondary" onclick="createMatch()" style="align-self:flex-end;white-space:nowrap;">➕ Agregar Manual</button>
@@ -762,14 +779,14 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       <button class="btn btn-primary" onclick="printFixture()">🖨️ Imprimir Fixture</button>
     </div>
 
-    <!-- Fixture display -->
+    <!-- Fixture display by time -->
     <div class="card print-only" id="fixture-card" style="display:none;">
       <div class="print-header">
-        <h1>NEWCOM — Fixture</h1>
+        <h1>NEWCOM — Cronograma de Partidos</h1>
         <p id="print-tournament-name"></p>
       </div>
-      <div class="card-title">FIXTURE POR CANCHAS</div>
-      <div class="fixture-grid" id="fixture-grid"></div>
+      <div class="card-title">⏰ HORARIOS DE PARTIDOS</div>
+      <div id="fixture-grid"></div>
     </div>
 
     <!-- Partidos list -->
@@ -1926,25 +1943,65 @@ function addMinutes(timeStr, mins) {
 }
 
 function updateFixturePreview() {
-  const courts   = parseInt(document.getElementById('inp-fixture-courts')?.value) || 2;
-  const start    = document.getElementById('inp-fixture-start')?.value || '09:00';
-  const duration = parseInt(document.getElementById('inp-fixture-duration')?.value) || 30;
-  const gap      = parseInt(document.getElementById('inp-fixture-gap')?.value) || 10;
-  const catId    = parseInt(document.getElementById('sel-fixture-cat')?.value);
+  const courts      = parseInt(document.getElementById('inp-fixture-courts')?.value) || 2;
+  const start       = document.getElementById('inp-fixture-start')?.value || '09:00';
+  const endLimit    = document.getElementById('inp-fixture-end-limit')?.value || '18:00';
+  const duration    = parseInt(document.getElementById('inp-fixture-duration')?.value) || 30;
+  const gap         = parseInt(document.getElementById('inp-fixture-gap')?.value) || 10;
+  const catId       = parseInt(document.getElementById('sel-fixture-cat')?.value);
   const matchesPerTeam = parseInt(document.getElementById('inp-matches-per-team')?.value) || 1;
-  const endEl    = document.getElementById('fixture-end-time');
-  const roundsEl = document.getElementById('fixture-rounds-info');
+  
+  const timeAvailEl = document.getElementById('fixture-time-available');
+  const capacityEl  = document.getElementById('fixture-capacity-per-court');
+  const maxMatchEl  = document.getElementById('fixture-max-matches');
+  const warningEl   = document.getElementById('fixture-capacity-warning');
 
-  if (!catId || !endEl) return;
+  if (!catId || !timeAvailEl) return;
 
-  const active = state.teams.filter(t => t.categoryId === catId && t.active);
-  const totalMatches = Math.floor(active.length / 2) * matchesPerTeam;
+  // Calcular tiempo disponible en minutos
+  const [startH, startM] = start.split(':').map(Number);
+  const [endH, endM] = endLimit.split(':').map(Number);
+  const startTotalMin = startH * 60 + startM;
+  const endTotalMin = endH * 60 + endM;
+  const timeAvailableMin = endTotalMin - startTotalMin;
+  
+  if (timeAvailableMin <= 0) {
+    if (warningEl) warningEl.textContent = '⚠ La hora de fin debe ser posterior a la hora de inicio';
+    if (timeAvailEl) timeAvailEl.textContent = '—';
+    if (capacityEl) capacityEl.textContent = '—';
+    if (maxMatchEl) maxMatchEl.textContent = '—';
+    return;
+  }
+
+  // Calcular cuántos partidos caben
   const slot = duration + gap;
-  const matchesPerCourt = Math.ceil(totalMatches / courts);
-  const endTime = addMinutes(start, matchesPerCourt * slot);
+  const matchesPerCourt = Math.floor(timeAvailableMin / slot);
+  const maxTotalMatches = matchesPerCourt * courts;
 
-  endEl.textContent = totalMatches > 0 ? endTime : '—';
-  if (roundsEl) roundsEl.textContent = matchesPerCourt > 0 ? `${matchesPerCourt} p/cancha` : '—';
+  // Formatear tiempo disponible
+  const hours = Math.floor(timeAvailableMin / 60);
+  const mins = timeAvailableMin % 60;
+  const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+
+  timeAvailEl.textContent = timeStr;
+  capacityEl.textContent = matchesPerCourt > 0 ? `${matchesPerCourt}` : '0';
+  maxMatchEl.textContent = maxTotalMatches > 0 ? `${maxTotalMatches}` : '0';
+
+  // Validar contra partidos a generar
+  const active = state.teams.filter(t => t.categoryId === catId && t.active);
+  const totalNeeded = Math.floor(active.length / 2) * matchesPerTeam;
+
+  if (warningEl) {
+    if (totalNeeded > maxTotalMatches) {
+      warningEl.style.color = 'var(--danger)';
+      warningEl.textContent = `⚠ ALERTA: Necesitas ${totalNeeded} partidos pero solo caben ${maxTotalMatches} en el horario disponible. Aumentá canchas o reducí la duración.`;
+    } else if (totalNeeded > 0) {
+      warningEl.style.color = 'var(--accent3)';
+      warningEl.textContent = `✓ Horario suficiente: ${totalNeeded} partidos en ${matchesPerCourt}h por cancha.`;
+    } else {
+      warningEl.textContent = '';
+    }
+  }
 }
 
 // Asignar partidos a canchas y turnos
@@ -1976,16 +2033,42 @@ async function generarFixtureCustom() {
   const errEl        = document.getElementById('fixture-gen-err');
 
   if (errEl) errEl.textContent = '';
-  if (!catId) { if (errEl) errEl.textContent = 'Seleccioná una categoría'; return; }
+  if (!catId) { if (errEl) errEl.textContent = '⚠ Seleccioná una categoría'; return; }
 
   const active = state.teams.filter(t => t.categoryId === catId && t.active);
-  if (active.length < 2) { if (errEl) errEl.textContent = 'Se necesitan al menos 2 equipos'; return; }
+  if (active.length < 2) { if (errEl) errEl.textContent = '⚠ Se necesitan al menos 2 equipos'; return; }
 
   const maxPossible = active.length - 1;
-  if (matchesPerTeam > maxPossible) { if (errEl) errEl.textContent = `Máximo ${maxPossible} partidos por equipo`; return; }
+  if (matchesPerTeam > maxPossible) { if (errEl) errEl.textContent = `⚠ Máximo ${maxPossible} partidos por equipo`; return; }
+
+  // Validar tiempo disponible
+  const endLimit     = document.getElementById('inp-fixture-end-limit')?.value || '18:00';
+  const [startH, startM] = start.split(':').map(Number);
+  const [endH, endM] = endLimit.split(':').map(Number);
+  const startTotalMin = startH * 60 + startM;
+  const endTotalMin = endH * 60 + endM;
+  const timeAvailableMin = endTotalMin - startTotalMin;
+
+  if (timeAvailableMin <= 0) {
+    if (errEl) errEl.textContent = '⚠ La hora de fin debe ser posterior a la hora de inicio';
+    return;
+  }
+
+  const slot = duration + gap;
+  const matchesPerCourt = Math.floor(timeAvailableMin / slot);
+  const maxTotalMatches = matchesPerCourt * courts;
 
   const nuevosPartidos = generarPartidos(active, matchesPerTeam);
-  if (!nuevosPartidos.length) { if (errEl) errEl.textContent = 'No se pudieron generar partidos'; return; }
+  if (!nuevosPartidos.length) { if (errEl) errEl.textContent = '⚠ No se pudieron generar partidos'; return; }
+
+  // VALIDACIÓN CRÍTICA: Verificar si los partidos caben en el horario
+  if (nuevosPartidos.length > maxTotalMatches) {
+    if (errEl) {
+      errEl.textContent = `❌ ALERTA HORARIA: Necesitas ${nuevosPartidos.length} partidos pero solo caben ${maxTotalMatches}.\n\nOpciones:\n• Aumentá canchas de ${courts} a ${Math.ceil(nuevosPartidos.length / matchesPerCourt)}\n• Reducí duración/descanso\n• Extendé el horario`;
+      errEl.style.whiteSpace = 'pre-wrap';
+    }
+    return;
+  }
 
   for (const p of nuevosPartidos) {
     const exists = state.matches.find(m =>
@@ -2012,10 +2095,10 @@ async function generarFixtureCustom() {
   renderFixtureCustomDisplay(courtData, active, courts, nuevosPartidos.length, fixtureName, start, duration, gap);
   renderMatches();
   renderDashboard();
-  notify(`Fixture generado: ${nuevosPartidos.length} partidos en ${courts} cancha(s) ✓`);
+  notify(`✓ Cronograma generado: ${nuevosPartidos.length} partidos en ${courts} cancha(s)`);
 }
 
-// Renderizar resultado del fixture custom
+// Renderizar resultado del fixture custom - POR HORARIOS (Nueva visualización profesional)
 function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fixtureName, start, duration, gap) {
   const card = document.getElementById('fixture-card');
   const grid = document.getElementById('fixture-grid');
@@ -2029,6 +2112,24 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
   const teamMap = {};
   teams.forEach(t => teamMap[t.id] = t);
 
+  // Agrupar partidos por horario
+  const partidosPorHorario = {};
+  courtData.forEach(court => {
+    court.partidos.forEach(match => {
+      const hora = match.hora || start;
+      if (!partidosPorHorario[hora]) {
+        partidosPorHorario[hora] = [];
+      }
+      partidosPorHorario[hora].push({
+        match,
+        court: court.numero
+      });
+    });
+  });
+
+  // Ordenar horarios
+  const horariosOrdenados = Object.keys(partidosPorHorario).sort();
+
   const totalPartidos = courtData.reduce((a, c) => a + c.partidos.length, 0);
   const slot = duration + gap;
   const maxPerCourt = Math.max(...courtData.map(c => c.partidos.length));
@@ -2038,7 +2139,7 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
 
   let html = `
     <div class="fixture-result-section">
-      <div class="fixture-result-title">🏸 ${fixtureName.toUpperCase()}</div>
+      <div class="fixture-result-title">📅 ${fixtureName.toUpperCase()}</div>
       <div class="fixture-result-summary">
         <span><span class="label">Equipos:</span> <span class="value">${teams.length}</span></span>
         <span><span class="label">Partidos:</span> <span class="value">${totalPartidos}</span></span>
@@ -2046,27 +2147,35 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
         <span><span class="label">Inicio:</span> <span class="value">${start}</span></span>
         <span><span class="label">Fin aprox:</span> <span class="value">${endTime}</span></span>
       </div>
-      <div class="fixture-grid">
-        ${courtData.map(c => {
-          const t1 = teamMap[c.partidos[0]?.t1];
-          return `
-          <div class="fixture-court">
-            <div class="fixture-court-num">🏸 CANCHA ${c.numero} <span style="font-size:10px;color:var(--text-muted);">(${c.partidos.length} partidos)</span></div>
-            ${c.partidos.map((m, i) => {
-              const eq1 = teamMap[m.t1];
-              const eq2 = teamMap[m.t2];
-              return `<div class="fixture-match">
-                <span class="fixture-match-n">#${i+1}</span>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);min-width:42px;">${m.hora}</span>
-                <span>${eq1 ? eq1.abbr : '?'}</span>
-                <span class="fixture-vs">vs</span>
-                <span>${eq2 ? eq2.abbr : '?'}</span>
-              </div>`;
-            }).join('')}
-          </div>`;
-        }).join('')}
+  `;
+
+  // Generar bloques por horario (Nueva visualización por hora)
+  html += `<div style="margin-top:16px;">`;
+  horariosOrdenados.forEach((horario) => {
+    const partidos = partidosPorHorario[horario];
+    html += `
+      <div class="fixture-horario-block">
+        <div class="fixture-horario-time">⏰ ${horario} hs</div>
+        <div class="fixture-horario-partidos">
+    `;
+    
+    partidos.forEach((item) => {
+      const eq1 = teamMap[item.match.t1];
+      const eq2 = teamMap[item.match.t2];
+      html += `
+        <div class="fixture-horario-partido">
+          <span class="fixture-cancha-badge">🏸 C${item.court}</span>
+          <span style="flex:1;"><strong>${eq1 ? eq1.abbr : '?'}</strong> <span style="color:var(--text-muted);">vs</span> <strong>${eq2 ? eq2.abbr : '?'}</strong></span>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
       </div>
-    </div>`;
+    `;
+  });
+  html += `</div></div>`;
 
   grid.innerHTML = html;
 }
