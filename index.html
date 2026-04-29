@@ -795,18 +795,14 @@ Este software es propiedad exclusiva de Newcom Technologies. Al activar esta lic
       <button class="btn btn-primary" onclick="printFixture()">🖨️ Imprimir Fixture</button>
     </div>
 
-    <!-- Fixture display by time -->
-    <div class="card print-only" id="fixture-card" style="display:none;">
-      <div class="print-header">
-        <h1>NEWCOM — Cronograma de Partidos</h1>
-        <p id="print-tournament-name"></p>
-      </div>
+    <!-- Unified Fixture Display -->
+    <div class="card no-print" id="fixture-unified-card" style="display:none;">
       <div class="card-title">⏰ HORARIOS DE PARTIDOS</div>
-      <div id="fixture-grid"></div>
+      <div id="fixture-unified-grid"></div>
     </div>
 
-    <!-- Partidos list -->
-    <div class="card">
+    <!-- Partidos list (keep for compatibility) -->
+    <div class="card" id="matches-list-card">
       <div class="card-title" id="matches-cat-title">Partidos</div>
       <div class="matches-list" id="matches-list"></div>
     </div>
@@ -1275,20 +1271,46 @@ function showPage(id, event){
     renderMatchSelects();
     renderMatches();
     initMatchesCategoryHeader();
-    if(currentFixtureCourts.length>0){
-      renderFixture(currentFixtureCourts);
-    } else {
-      const fc=document.getElementById('fixture-card');
-      const ps=document.getElementById('print-section');
-      if(fc) fc.style.display='none';
-      if(ps) ps.style.display='none';
-    }
+    renderUnifiedFixture();
   }
   if(id==='standings'){ renderCatBar('standings-cat-bar','standings'); renderStandings(); }
   if(id==='categories'){ renderCategories(); }
   if(id==='resources'){ renderResources(); }
   if(id==='profile')   renderProfile();
   if(id==='dashboard') renderDashboard();
+}
+
+function renderUnifiedFixture(){
+  const unifiedCard=document.getElementById('fixture-unified-card');
+  const listCard=document.getElementById('matches-list-card');
+  if(!unifiedCard || !listCard) return;
+  
+  const cat=currentCat('matches');
+  if(!cat){
+    unifiedCard.style.display='none';
+    listCard.style.display='block';
+    return;
+  }
+  
+  const pendingCat = state.matches.filter(m => m.categoryId === cat.id && m.status === 'pending');
+  const active = state.teams.filter(t => t.categoryId === cat.id && t.active);
+  
+  if(pendingCat.length === 0){
+    unifiedCard.style.display='none';
+    listCard.style.display='block';
+    return;
+  }
+  
+  unifiedCard.style.display='block';
+  listCard.style.display='none';
+  
+  const courts = parseInt(document.getElementById('inp-fixture-courts')?.value) || 2;
+  const start = document.getElementById('inp-fixture-start')?.value || '09:00';
+  const duration = parseInt(document.getElementById('inp-fixture-duration')?.value) || 30;
+  const gap = parseInt(document.getElementById('inp-fixture-gap')?.value) || 10;
+  
+  const courtData = asignarCanchas(pendingCat, courts, start, duration, gap);
+  renderFixtureCustomDisplay(courtData, active, courts, pendingCat.length, 'Fixture', start, duration, gap);
 }
 
 /* ════════════════════════════════════════════
@@ -1776,6 +1798,26 @@ async function saveMatch(mid){
   notify(`Guardado — ${winner.name} (${result.resultado}) ✓`);
 }
 
+// Wrapper para guardar resultado desde el fixture unificado
+async function saveMatchResult(mid){
+  await saveMatch(mid);
+  renderFixtureCustomDisplayFromState();
+}
+
+function renderFixtureCustomDisplayFromState(){
+  const cat=currentCat('matches');
+  if(!cat) return;
+  const pendingCat = state.matches.filter(m => m.categoryId === cat.id && m.status === 'pending');
+  const active = state.teams.filter(t => t.categoryId === cat.id && t.active);
+  const courts = parseInt(document.getElementById('inp-fixture-courts')?.value) || 2;
+  const start = document.getElementById('inp-fixture-start')?.value || '09:00';
+  const duration = parseInt(document.getElementById('inp-fixture-duration')?.value) || 30;
+  const gap = parseInt(document.getElementById('inp-fixture-gap')?.value) || 10;
+  
+  const courtData = asignarCanchas(pendingCat, courts, start, duration, gap);
+  renderFixtureCustomDisplay(courtData, active, courts, pendingCat.length, 'Fixture', start, duration, gap);
+}
+
 async function setWinner(mid, setIdx, ganador){
   const m=state.matches.find(m=>m.id===mid); if(!m||m.status==='done') return;
   if(ganador==='A'){ m.sets[setIdx].s1=1; m.sets[setIdx].s2=0; }
@@ -2170,10 +2212,10 @@ async function generarFixtureCustom() {
   notify(`✓ Cronograma generado: ${nuevosPartidos.length} partidos en ${courts} cancha(s)`);
 }
 
-// Renderizar resultado del fixture custom - POR HORARIOS (Nueva visualización profesional)
+// Renderizar resultado del fixture custom - POR HORARIOS (Nueva visualización profesional unificada)
 function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fixtureName, start, duration, gap) {
-  const card = document.getElementById('fixture-card');
-  const grid = document.getElementById('fixture-grid');
+  const card = document.getElementById('fixture-unified-card');
+  const grid = document.getElementById('fixture-unified-grid');
   const printSec = document.getElementById('print-section');
   if (!card || !grid) return;
   if (!courtData || courtData.length === 0) { card.style.display = 'none'; return; }
@@ -2210,23 +2252,11 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
   document.getElementById('print-tournament-name').textContent = currentTournament?.name || '';
 
   let html = `
-    <div class="fixture-result-section">
-      <div class="fixture-result-title">📅 ${fixtureName.toUpperCase()}</div>
-      <div class="fixture-result-summary">
-        <span><span class="label">Equipos:</span> <span class="value">${teams.length}</span></span>
-        <span><span class="label">Partidos:</span> <span class="value">${totalPartidos}</span></span>
-        <span><span class="label">Canchas:</span> <span class="value">${courts}</span></span>
-        <span><span class="label">Inicio:</span> <span class="value">${start}</span></span>
-        <span><span class="label">Fin aprox:</span> <span class="value">${endTime}</span></span>
-      </div>
-  `;
-
-  // Generar bloques por horario (Nueva visualización por hora)
-  html += `<div style="margin-top:16px;">`;
+    <div style="margin-top:16px;">`;
   horariosOrdenados.forEach((horario) => {
     const partidos = partidosPorHorario[horario];
     html += `
-      <div class="fixture-horario-block">
+      <div class="fixture-horario-block" style="margin-bottom:20px;">
         <div class="fixture-horario-time">⏰ ${horario} hs</div>
         <div class="fixture-horario-partidos">
     `;
@@ -2234,12 +2264,33 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
     partidos.forEach((item) => {
       const eq1 = teamMap[item.match.t1];
       const eq2 = teamMap[item.match.t2];
+      const match = item.match;
+      const isDone = match.status === 'done';
+      const statusClass = isDone ? 'status-done' : match.status === 'playing' ? 'status-pending' : 'status-pending';
+      const statusText = isDone ? '✓ Finalizado' : match.status === 'playing' ? 'En juego' : 'Pendiente';
+      
       html += `
-        <div class="fixture-horario-partido">
-          <span class="fixture-cancha-badge">🏸 C${item.court}</span>
-          <span style="flex:1;"><strong>${eq1 ? eq1.abbr : '?'}</strong> <span style="color:var(--text-muted);">vs</span> <strong>${eq2 ? eq2.abbr : '?'}</strong></span>
+        <div class="fixture-horario-partido" style="flex-direction:column;gap:8px;padding:12px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <span class="fixture-cancha-badge">🏸 C${item.court}</span>
+            <span class="match-status ${statusClass}">${statusText}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <strong style="min-width:60px;text-align:center;">${eq1 ? eq1.abbr : '?'}</strong> 
+            <span style="color:var(--text-muted);font-weight:600;">vs</span> 
+            <strong style="min-width:60px;text-align:center;">${eq2 ? eq2.abbr : '?'}</strong>
+          </div>
+          <!-- Resultados por set -->
+          <div class="match-sets" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+            ${renderSetScores(match)}
+          </div>
+          <!-- Botones de acción -->
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-success btn-sm" onclick="saveMatchResult(${match.id})">Guardar Resultado</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteMatch(${match.id})">Eliminar</button>
+          </div>
         </div>
-      `;
+    `;
     });
 
     html += `
@@ -2247,14 +2298,52 @@ function renderFixtureCustomDisplay(courtData, teams, courts, totalGenerated, fi
       </div>
     `;
   });
-  html += `</div></div>`;
+  html += `</div>`;
 
   grid.innerHTML = html;
 }
 
+// Renderizar scores por set
+function renderSetScores(match) {
+  if (!match.sets || match.sets.length === 0) {
+    return `
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:12px;color:var(--text-muted);">Set 1:</span>
+        <input type="number" class="score-inp" style="width:24px;height:24px;" onchange="updateScore(${match.id}, 0, 's1', this.value)">
+        <span style="color:var(--text-muted);">-</span>
+        <input type="number" class="score-inp" style="width:24px;height:24px;" onchange="updateScore(${match.id}, 0, 's2', this.value)">
+        <span style="margin-left:12px;font-size:12px;color:var(--text-muted);">Set 2:</span>
+        <input type="number" class="score-inp" style="width:24px;height:24px;" onchange="updateScore(${match.id}, 1, 's1', this.value)">
+        <span style="color:var(--text-muted);">-</span>
+        <input type="number" class="score-inp" style="width:24px;height:24px;" onchange="updateScore(${match.id}, 1, 's2', this.value)">
+        <button class="btn btn-sm btn-accent2" style="margin-left:8px;" onclick="addSet(${match.id})">+</button>
+      </div>
+    `;
+  }
+  
+  let html = '';
+  match.sets.forEach((set, idx) => {
+    const v1 = set.s1 !== '' ? set.s1 : '';
+    const v2 = set.s2 !== '' ? set.s2 : '';
+    html += `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+        <span style="font-size:11px;color:var(--text-muted);min-width:40px;">Set ${idx + 1}:</span>
+        <input type="number" class="score-inp" style="width:28px;height:28px;" value="${v1}" onchange="updateScore(${match.id}, ${idx}, 's1', this.value)">
+        <span style="color:var(--text-muted);">-</span>
+        <input type="number" class="score-inp" style="width:28px;height:28px;" value="${v2}" onchange="updateScore(${match.id}, ${idx}, 's2', this.value)">
+        ${idx >= 2 ? `<button class="rem-set-btn" onclick="removeSet(${match.id}, ${idx})">−</button>` : ''}
+      </div>
+    `;
+  });
+  if (match.sets.length < 3) {
+    html += `<button class="add-set-btn" style="margin-top:4px;" onclick="addSet(${match.id})">Agregar set</button>`;
+  }
+  return html;
+}
+
 /* ════════════════════════════════════════════
    STANDINGS
-═══════════════════════════════════════════ */
+   ════════════════════════════════════════════ */
 function calcStandingsForCat(catId){
   const s={};
   state.teams.filter(t=>t.categoryId===catId).forEach(t=>{
